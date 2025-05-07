@@ -31,6 +31,8 @@ public class User {
 
     private LocalDateTime deletedAt;
 
+    private String profileUrl;
+
     @OneToMany(mappedBy="user", cascade = CascadeType.PERSIST)
     private List<Photo> userPhotos = new ArrayList<>();
 
