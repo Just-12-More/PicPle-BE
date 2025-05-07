@@ -1,11 +1,13 @@
 package com.Just_112_More.PicPle.user.domain;
 
+import com.Just_112_More.PicPle.photo.domain.Photo;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -28,10 +30,10 @@ public class User {
 
     private LocalDateTime deletedAt;
 
-    @OneToMany(mappedBy="user", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy="user", cascade = CascadeType.PERSIST)
     private List<Photo> userPhotos = new ArrayList<>();
 
-    @OneToMany(mappedBy="user", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy="user", cascade = CascadeType.PERSIST)
     private List<Like> userLikes = new ArrayList<>();
 
     // 엔티티가 저장되기 전에 userCreate 자동 설정
