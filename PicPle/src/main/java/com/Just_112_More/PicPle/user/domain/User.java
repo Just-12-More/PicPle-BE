@@ -1,5 +1,6 @@
 package com.Just_112_More.PicPle.user.domain;
 
+import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import jakarta.persistence.*;
 import lombok.Getter;

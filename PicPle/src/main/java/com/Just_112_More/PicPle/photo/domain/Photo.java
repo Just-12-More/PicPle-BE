@@ -1,5 +1,6 @@
 package com.Just_112_More.PicPle.photo.domain;
 
+import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
