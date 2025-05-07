@@ -1,4 +1,4 @@
-package com.Just_112_More.PicPle.like.repository;
+package com.Just_112_More.PicPle.user.repository;
 
 import com.Just_112_More.PicPle.user.domain.User;
 import jakarta.persistence.EntityManager;
