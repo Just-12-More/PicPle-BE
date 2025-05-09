@@ -1,6 +1,5 @@
 package com.Just_112_More.PicPle.photo.repository;
 
-import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.user.domain.User;
 import jakarta.persistence.EntityManager;
