@@ -32,22 +32,6 @@ public class PhotoRepository {
                 .getResultList();
     }
 
-    // 사용자가 업로드한 사진 목록 조회
-    public List<Photo> findPhotosByUser(User user) {
-        String jpql = "SELECT p FROM Photo p WHERE p.user = :user";
-        return em.createQuery(jpql, Photo.class)
-                .setParameter("user", user)
-                .getResultList();
-    }
-
-    // 사용자가 좋아요한 사진 목록 조회
-    public List<Photo> findPhotosLikedByUser(User user) {
-        String jpql = "SELECT l.photo FROM Like l WHERE l.user = :user";
-        return em.createQuery(jpql, Photo.class)
-                .setParameter("user", user)
-                .getResultList();
-    }
-
     // 이미지 삭제 (DB 레코드에서만 삭제처리)
     public void deleteById(Long photoId) {
         Photo photo = em.find(Photo.class, photoId);
