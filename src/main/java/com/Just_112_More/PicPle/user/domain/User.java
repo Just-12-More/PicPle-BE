@@ -4,6 +4,7 @@ import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
+@Getter @Setter
 @ToString(exclude = "userLikes")
 public class User {
     @Id @GeneratedValue
@@ -33,10 +34,10 @@ public class User {
 
     private String profileUrl;
 
-    @OneToMany(mappedBy="user", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy="user")
     private List<Photo> userPhotos = new ArrayList<>();
 
-    @OneToMany(mappedBy="user", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy="user")
     private List<Like> userLikes = new ArrayList<>();
 
     // 엔티티가 저장되기 전에 userCreate 자동 설정
