@@ -8,12 +8,6 @@ spring:
     username: sa
     password:
 
-  #datasource:
-    #driver-class-name: com.mysql.cj.jdbc.Driver
-    #url: jdbc:mysql://picple.cdwkmu84aawc.ap-northeast-2.rds.amazonaws.com:3306/picple?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    #username: admin
-    #password:  picpledev00!!
-
   h2:
     console:
       enabled: true
