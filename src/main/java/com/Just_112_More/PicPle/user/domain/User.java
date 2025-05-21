@@ -2,6 +2,7 @@ package com.Just_112_More.PicPle.user.domain;
 
 import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.security.oauth.OAuthUserInfo;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,12 +26,16 @@ public class User {
 
     private String userName;
 
-    private String password;
+    private String providerId;
 
-    private String role="ROLE_USER";
+    private String email;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     private String userImageUrl;
 
+    // @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean isDeleted = false;
 
     private LocalDateTime userCreate;
@@ -45,13 +50,36 @@ public class User {
     @OneToMany(mappedBy="user")
     private List<Like> userLikes = new ArrayList<>();
 
-    // 엔티티가 저장되기 전에 userCreate 자동 설정
-    @PrePersist
-    public void prePersist() {
-        if (this.userCreate == null) {
-            this.userCreate = LocalDateTime.now();
-        }
+    private User(Long id, String email, String providerId, LoginProvider provider, Role role, LocalDateTime joinedAt) {
+        this.id = id;
+        this.email = email;
+        this.providerId = providerId;
+        this.provider = provider;
+        this.role = role;
+        this.userCreate = joinedAt;
     }
+
+    protected User() {
+    }
+
+    public static User fromOAuth(OAuthUserInfo info) {
+        return new User(
+                null,
+                info.getEmail(),
+                info.getProviderId(),
+                info.getProvider(),
+                Role.USER,
+                LocalDateTime.now()
+        );
+    }
+
+    // 엔티티가 저장되기 전에 userCreate 자동 설정
+//    @PrePersist
+//    public void prePersist() {
+//        if (this.userCreate == null) {
+//            this.userCreate = LocalDateTime.now();
+//        }
+//    }
 
     //논리 삭제 메서드
     public void deleteUser() {
