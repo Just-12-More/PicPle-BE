@@ -14,6 +14,7 @@ import java.util.List;
 @Entity
 @Getter @Setter
 @ToString(exclude = "userLikes")
+@Table(name = "picple_user")
 public class User {
     @Id @GeneratedValue
     @Column(name="user_id")
@@ -23,6 +24,10 @@ public class User {
     private LoginProvider provider;
 
     private String userName;
+
+    private String password;
+
+    private String role="ROLE_USER";
 
     private String userImageUrl;
 
