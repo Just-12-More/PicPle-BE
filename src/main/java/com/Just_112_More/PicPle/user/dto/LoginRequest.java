@@ -1,5 +1,6 @@
 package com.Just_112_More.PicPle.user.dto;
 
+import com.Just_112_More.PicPle.user.domain.LoginProvider;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -10,12 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginRequest {
-
-    @NotNull
-    @Size(min = 3, max = 50)
-    private String username;
-
-    @NotNull
-    @Size(min = 3, max = 100)
-    private String password;
+    private String accessToken;
+    private LoginProvider provider; // enum (KAKAO, APPLE 등)
 }
