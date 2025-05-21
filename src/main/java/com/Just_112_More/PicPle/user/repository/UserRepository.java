@@ -5,6 +5,9 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 @RequiredArgsConstructor
 public class UserRepository {
@@ -21,6 +24,13 @@ public class UserRepository {
 
     public User findOne(Long id){
         return em.find(User.class, id);
+    }
+
+    public Optional<User> findByUsername(String username) {
+        List<User> result = em.createQuery("SELECT u FROM User u WHERE u.userName = :username", User.class)
+                .setParameter("username", username)
+                .getResultList();
+        return result.stream().findAny();
     }
 
 }
