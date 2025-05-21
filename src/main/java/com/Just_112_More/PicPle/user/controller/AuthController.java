@@ -1,7 +1,8 @@
 package com.Just_112_More.PicPle.user.controller;
 
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
-import com.Just_112_More.PicPle.user.dto.LoginDto;
+import com.Just_112_More.PicPle.user.dto.LoginRequest;
+import com.Just_112_More.PicPle.user.dto.LoginResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +23,13 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginDto) {
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
 
         Authentication authentication = authenticationManager.authenticate(authToken);
         String token = jwtUtil.createToken(authentication);
 
-        return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, "Bearer " + token).body(token);
+        return ResponseEntity.ok(new LoginResponse(token));
     }
 }
