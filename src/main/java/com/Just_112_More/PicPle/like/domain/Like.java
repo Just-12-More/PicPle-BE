@@ -8,6 +8,7 @@ import lombok.ToString;
 
 @Entity
 @Getter
+@Table(name = "photo_like")
 public class Like {
     @Id @GeneratedValue
     @Column(name="like_id")
