@@ -15,7 +15,8 @@ import java.util.List;
 @ToString(exclude = "user, photoLikes")
 public class Photo {
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="photo_id")
     private Long id;
 
