@@ -18,59 +18,67 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil implements InitializingBean {
 
     private final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
-    private final String secretKey;
-    private final long tokenValidityInMilliseconds;
-    private Key key;
+
+    // 설정 값
+    private final String accessSecret;
+    private final String refreshSecret;
+    private final long accessTokenValidityInMilliseconds;
+    private final long refreshTokenValidityInMilliseconds;
+
+
+    // 서명 키
+    private Key accessKey;
+    private Key refreshKey;
 
     public JwtUtil(
-            @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds
+            @Value("${jwt.access-secret}") String accessSecret,
+            @Value("${jwt.refresh-secret}") String refreshSecret,
+            @Value("${jwt.access-token-validity-in-seconds}") long accessValiditySeconds,
+            @Value("${jwt.refresh-token-validity-in-seconds}") long refreshValiditySeconds
     ) {
-        this.secretKey = secretKey;
-        this.tokenValidityInMilliseconds = tokenValidityInSeconds * 1000;
+        this.accessSecret = accessSecret;
+        this.refreshSecret = refreshSecret;
+        this.accessTokenValidityInMilliseconds = accessValiditySeconds * 1000;
+        this.refreshTokenValidityInMilliseconds = refreshValiditySeconds * 1000;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-//        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-//        this.key = Keys.hmacShaKeyFor(keyBytes);
-
-        try {
-            byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-            logger.info("Decoded key length: {}", keyBytes.length); // ✅ 로그로 길이 확인
-            this.key = Keys.hmacShaKeyFor(keyBytes);
-        } catch (Exception e) {
-            logger.error("JWT 키 초기화 실패", e); // ✅ 어떤 예외인지 명확히 출력
-            throw e;
-        }
+        this.accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessSecret));
+        this.refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshSecret));
     }
 
-    public String createToken(Authentication authentication) {
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        long now = (new Date()).getTime();
-        Date validity = new Date(now + this.tokenValidityInMilliseconds);
-
+    // AccessToken - 일반 요청 인증 용
+    public String createAccessToken(Long userId, List<String> authorities) {
         return Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("authorities", authorities)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .setExpiration(validity)
+                .setSubject(String.valueOf(userId))
+                .claim("authorities", String.join(",", authorities))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenValidityInMilliseconds))
+                .signWith(accessKey, SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    public Authentication getAuthentication(String token) {
+    // RefreshToken - 재발급용
+    public String createRefreshToken(Long userId) {
+        return Jwts.builder()
+                .setSubject(String.valueOf(userId))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenValidityInMilliseconds))
+                .signWith(refreshKey, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    // accessToken 인증정보 추출
+    public Authentication getAuthenticationFromAccessToken(String token) {
         Claims claims = Jwts
                 .parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(accessKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -85,7 +93,16 @@ public class JwtUtil implements InitializingBean {
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
-    public boolean validateToken(String token) {
+    // 유효성 검사 (용도별 분리)
+    public boolean validateAccessToken(String token) {
+        return validate(token, accessKey);
+    }
+
+    public boolean validateRefreshToken(String token) {
+        return validate(token, refreshKey);
+    }
+
+    public boolean validate(String token, Key key) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
@@ -101,6 +118,27 @@ public class JwtUtil implements InitializingBean {
         return false;
     }
 
+    // 공통 메서드 - userId 추출
+    public Long extractUserId(String token, boolean isRefresh) {
+        Key key = isRefresh ? refreshKey : accessKey;
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
 
+        return Long.parseLong(claims.getSubject());
+    }
+
+    // refreshToken 만료 시간 확인
+    public Date extractExpiration(String token, boolean isRefresh) {
+        Key key = isRefresh ? refreshKey : accessKey;
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+    }
 
 }
