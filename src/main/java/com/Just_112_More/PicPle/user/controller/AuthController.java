@@ -5,6 +5,7 @@ import com.Just_112_More.PicPle.user.dto.LoginResponse;
 import com.Just_112_More.PicPle.user.dto.ReissueRequest;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 import com.Just_112_More.PicPle.user.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -73,6 +74,14 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(new LoginResponse(newAccessToken, refreshToken));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        String token = jwtUtil.resolveToken(request);
+        Long userId = jwtUtil.extractUserId(token, false);
+        authService.logout(userId);
+        return ResponseEntity.ok().build();
     }
 
 

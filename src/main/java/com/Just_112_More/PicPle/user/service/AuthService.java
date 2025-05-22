@@ -45,4 +45,8 @@ public class AuthService {
 
         return new LoginResponse(accessToken, refreshToken);
     }
+
+    public void logout(Long userId){
+        redisTemplate.delete("RT:"+userId);
+    }
 }
