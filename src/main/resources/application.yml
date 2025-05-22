@@ -8,6 +8,12 @@ spring:
     username: sa
     password:
 
+  data:
+    redis:
+      host: 15.164.183.246
+      port: 6379
+      password: picple88
+
   h2:
     console:
       enabled: true
@@ -28,3 +34,12 @@ server:
 logging.level:
   org.hibernate.SQL: debug
   org.hibernate.orm.jdbc.bind: trace
+
+jwt:
+  header: Authorization
+  # picple-capstone-project-just-12-more-team-access-key-generate-250522
+  access-secret: cGljcGxlLWNhcHN0b25lLXByb2plY3QtanVzdC0xMi1tb3JlLXRlYW0tYWNjZXNzLWtleS1nZW5lcmF0ZS0yNTA1MjIK
+  # picple-capstone-project-just-12-more-team-refresh-key-generate-250522
+  refresh-secret: cGljcGxlLWNhcHN0b25lLXByb2plY3QtanVzdC0xMi1tb3JlLXRlYW0tcmVmcmVzaC1rZXktZ2VuZXJhdGUtMjUwNTIyCg==
+  access-token-validity-in-seconds: 900     # 15분
+  refresh-token-validity-in-seconds: 1209600  #
