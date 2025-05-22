@@ -88,6 +88,8 @@ local.properties
 
 # User-specific stuff
 .idea
+.idea/**/compiler.xml
+.idea/***/misc.xml
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml
@@ -355,3 +357,4 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,visualstudiocode,intellij,java,gradle,maven,eclipse,netbeans,git
+./src/main/resources/application.yml
