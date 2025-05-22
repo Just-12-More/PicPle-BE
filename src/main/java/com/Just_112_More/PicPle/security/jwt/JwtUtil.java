@@ -3,6 +3,7 @@ package com.Just_112_More.PicPle.security.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -13,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Arrays;
@@ -20,6 +22,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.Just_112_More.PicPle.security.jwt.JwtFilter.AUTHORIZATION_HEADER;
 
 @Component
 public class JwtUtil implements InitializingBean {
@@ -139,6 +143,17 @@ public class JwtUtil implements InitializingBean {
                 .parseClaimsJws(token)
                 .getBody()
                 .getExpiration();
+    }
+
+    // 공용 헤더의 accesstoken추출 메서드
+     public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+
+        return null;
     }
 
 }
