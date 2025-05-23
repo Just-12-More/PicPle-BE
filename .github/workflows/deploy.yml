@@ -31,8 +31,13 @@ jobs:
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
 
-      - name: 빌드된 파일 이름 변경하기
-        run: mv ./build/libs/*.jar ./project.jar
+      - name: 빌드된 파일 이름 확인
+        run: ls -al ./build/libs
+      
+      - name: project.jar 이름으로 복사
+        run: |
+          JAR_NAME=$(ls ./build/libs/*.jar | head -n 1)
+          cp "$JAR_NAME" ./project.jar
 
       - name: SCP로 EC2에 빌드된 파일 전송하기
         uses: appleboy/scp-action@v0.1.7
