@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -26,37 +27,21 @@ import java.util.stream.Collectors;
 import static com.Just_112_More.PicPle.security.jwt.JwtFilter.AUTHORIZATION_HEADER;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtil implements InitializingBean {
 
     private final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
-    // 설정 값
-    private final String accessSecret;
-    private final String refreshSecret;
-    private final long accessTokenValidityInMilliseconds;
-    private final long refreshTokenValidityInMilliseconds;
-
+    private final JwtProperties jwtProperties;
 
     // 서명 키
     private Key accessKey;
     private Key refreshKey;
 
-    public JwtUtil(
-            @Value("${jwt.access-secret}") String accessSecret,
-            @Value("${jwt.refresh-secret}") String refreshSecret,
-            @Value("${jwt.access-token-validity-in-seconds}") long accessValiditySeconds,
-            @Value("${jwt.refresh-token-validity-in-seconds}") long refreshValiditySeconds
-    ) {
-        this.accessSecret = accessSecret;
-        this.refreshSecret = refreshSecret;
-        this.accessTokenValidityInMilliseconds = accessValiditySeconds * 1000;
-        this.refreshTokenValidityInMilliseconds = refreshValiditySeconds * 1000;
-    }
-
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessSecret));
-        this.refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshSecret));
+        this.accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getAccessSecret()));
+        this.refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getRefreshSecret()));
     }
 
     // AccessToken - 일반 요청 인증 용
@@ -64,7 +49,7 @@ public class JwtUtil implements InitializingBean {
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("authorities", String.join(",", authorities))
-                .setExpiration(new Date(System.currentTimeMillis() + accessTokenValidityInMilliseconds))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getAccessTokenValidityInSeconds()))
                 .signWith(accessKey, SignatureAlgorithm.HS512)
                 .compact();
     }
@@ -73,7 +58,7 @@ public class JwtUtil implements InitializingBean {
     public String createRefreshToken(Long userId) {
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
-                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenValidityInMilliseconds))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenValidityInSeconds()))
                 .signWith(refreshKey, SignatureAlgorithm.HS512)
                 .compact();
     }
