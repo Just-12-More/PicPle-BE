@@ -1,6 +1,16 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,windows,visualstudiocode,intellij,java,gradle,maven,eclipse,netbeans,git
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,visualstudiocode,intellij,java,gradle,maven,eclipse,netbeans,git
 
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+build/
+.gradle/
+**/build/
+/src/main/resources/application.yml
+
 ### Eclipse ###
 .metadata
 bin/
@@ -355,6 +365,3 @@ gradle-app.setting
 ### Gradle Patch ###
 # Java heap dump
 *.hprof
-
-# End of https://www.toptal.com/developers/gitignore/api/macos,windows,visualstudiocode,intellij,java,gradle,maven,eclipse,netbeans,git
-./src/main/resources/application.yml
