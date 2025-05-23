@@ -42,6 +42,8 @@ public class JwtUtil implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         this.accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getAccessSecret()));
         this.refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getRefreshSecret()));
+        System.out.println("[DEBUG] accessSecret = " + jwtProperties.getAccessSecret());
+        System.out.println("[DEBUG] refreshSecret = " + jwtProperties.getRefreshSecret());
     }
 
     // AccessToken - 일반 요청 인증 용
