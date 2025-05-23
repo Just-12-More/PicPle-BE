@@ -20,13 +20,13 @@ public class UserService {
 
     // 사용자 정보 조회
     public User getUserInfo(Long userId) {
-        return userRepository.findOne(userId);
+        return userRepository.findOne(userId).orElse(null);
     }
 
     // 사용자 정보 수정( 닉네임, 프사 )
     @Transactional
     public void updateUserInfo(Long userId, String newNickname, String newProfileImage) {
-        User user = userRepository.findOne(userId);
+        User user = userRepository.findOne(userId).orElse(null);
         if (user != null) {
             user.setUserName(newNickname);  // 닉네임 수정
             user.setUserImageUrl(newProfileImage);  // 프로필 사진 수정
@@ -37,7 +37,7 @@ public class UserService {
     // 회원탈퇴 ( 논리적 삭제 )
     @Transactional
     public void deactivateUser(Long userId) {
-        User user = userRepository.findOne(userId);
+        User user = userRepository.findOne(userId).orElse(null);
         if (user != null) {
             user.deleteUser();  // 논리 삭제 처리
             userRepository.save(user);  // 변경된 사용자 상태 저장
