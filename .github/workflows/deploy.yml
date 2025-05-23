@@ -36,7 +36,7 @@ jobs:
       
       - name: project.jar 이름으로 복사
         run: |
-          JAR_NAME=$(ls ./build/libs/*.jar | head -n 1)
+          JAR_NAME=$(ls ./build/libs/*SNAPSHOT.jar | grep -v plain | head -n 1)
           cp "$JAR_NAME" ./project.jar
 
       - name: SCP로 EC2에 빌드된 파일 전송하기
