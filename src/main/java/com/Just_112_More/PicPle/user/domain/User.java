@@ -17,7 +17,7 @@ import java.util.List;
 @ToString(exclude = "userLikes")
 @Table(name = "picple_user")
 public class User {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="user_id")
     private Long id;
 
