@@ -9,8 +9,9 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
-		"jwt.access-secret=test-access",
-		"jwt.refresh-secret=test-refresh",
+		// this-is-a-test-secret-key-for-jwt-testing-purposes-123456
+		"jwt.access-secret=dGhpcy1pcy1hLXRlc3Qtc2VjcmV0LWtleS1mb3Itand0LXRlc3RpbmctcHVycG9zZXMtMTIzNDU2",
+		"jwt.refresh-secret=dGhpcy1pcy1hLXRlc3Qtc2VjcmV0LWtleS1mb3Itand0LXRlc3RpbmctcHVycG9zZXMtMTIzNDU2",
 		"jwt.access-token-validity-in-seconds=0",
 		"jwt.refresh-token-validity-in-seconds=0"
 })
