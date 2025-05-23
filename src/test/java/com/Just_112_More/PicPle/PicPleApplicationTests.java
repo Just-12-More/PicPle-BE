@@ -10,7 +10,9 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
 		"jwt.access-secret=test-access",
-		"jwt.refresh-secret=test-refresh"
+		"jwt.refresh-secret=test-refresh",
+		"jwt.access-token-validity-in-seconds=0",
+		"jwt.refresh-token-validity-in-seconds=0"
 })
 class PicPleApplicationTests {
 
