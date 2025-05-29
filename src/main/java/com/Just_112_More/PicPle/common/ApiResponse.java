@@ -22,7 +22,7 @@ public class ApiResponse <T>{
                 .build();
     }
 
-    private static <T> ApiResponse<T> fail(T data, String code, String message){
+    public static <T> ApiResponse<T> fail(T data, String code, String message){
         return ApiResponse.<T>builder()
                 .isSuccess(false)
                 .data(data)
