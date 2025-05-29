@@ -40,13 +40,13 @@ public class JwtUtil {
     private Key refreshKey;
 
     @PostConstruct
-        public void init() throws Exception {
-            if (jwtProperties.getAccessSecret() == null || jwtProperties.getRefreshSecret() == null) {
-                throw new IllegalStateException("JWT secrets must not be null");
-            }
+    public void init() throws Exception {
+        if (jwtProperties.getAccessSecret() == null || jwtProperties.getRefreshSecret() == null) {
+            throw new IllegalStateException("JWT secrets must not be null");
+        }
 
-            this.accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getAccessSecret()));
-            this.refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getRefreshSecret()));
+        this.accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getAccessSecret()));
+        this.refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getRefreshSecret()));
         System.out.println("[DEBUG] accessSecret = " + jwtProperties.getAccessSecret());
         System.out.println("[DEBUG] refreshSecret = " + jwtProperties.getRefreshSecret());
     }
