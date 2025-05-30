@@ -2,7 +2,6 @@ package com.Just_112_More.PicPle.exception;
 
 import com.Just_112_More.PicPle.common.ApiResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

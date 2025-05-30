@@ -1,5 +1,6 @@
 package com.Just_112_More.PicPle.security.jwt;
 
+import com.Just_112_More.PicPle.exception.CustomException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -28,12 +29,17 @@ public class JwtFilter extends GenericFilterBean {
         String jwt = jwtUtil.resolveToken(httpServletRequest);
         String requestURI = httpServletRequest.getRequestURI();
 
-        if (StringUtils.hasText(jwt) && jwtUtil.validateAccessToken(jwt)) {
-            Authentication authentication = jwtUtil.getAuthenticationFromAccessToken(jwt);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            logger.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
-        } else {
-            logger.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
+        try {
+            if (StringUtils.hasText(jwt) && jwtUtil.validateAccessToken(jwt)) {
+                Authentication authentication = jwtUtil.getAuthenticationFromAccessToken(jwt);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                logger.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
+            } else {
+                logger.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
+            }
+        } catch (CustomException e) {
+            // CustomException을 Spring Security가 이해할 수 있는 예외로 변환
+            throw new org.springframework.security.authentication.BadCredentialsException(e.getMessage(), e);
         }
 
         filterChain.doFilter(servletRequest, servletResponse);

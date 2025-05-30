@@ -1,10 +1,14 @@
 package com.Just_112_More.PicPle.user.controller;
 
+import com.Just_112_More.PicPle.common.ApiResponse;
+import com.Just_112_More.PicPle.exception.CustomException;
+import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.user.dto.LoginRequest;
 import com.Just_112_More.PicPle.user.dto.LoginResponse;
 import com.Just_112_More.PicPle.user.dto.ReissueRequest;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 import com.Just_112_More.PicPle.user.service.AuthService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -32,19 +36,17 @@ public class AuthController {
     private final UserRepository userRepository;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginDto) {
+    public ResponseEntity<ApiResponse<?>> login(@RequestBody LoginRequest loginDto) {
         LoginResponse loginResponse = authService.loginViaOAuth(loginDto);
-        return ResponseEntity.ok(loginResponse);
+        return ResponseEntity.ok(ApiResponse.success(loginResponse));
     }
 
     @PostMapping("/reissue/token")
-    public ResponseEntity<LoginResponse> reissue(@RequestBody ReissueRequest request) {
+    public ResponseEntity<ApiResponse<?>> reissue(@RequestBody ReissueRequest request) {
         String refreshToken = request.getRefreshToken();
 
         // 1. refreshToken 유효성 검증
-        if (!jwtUtil.validateRefreshToken(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        jwtUtil.validateRefreshToken(refreshToken); // JWTExcetpion발생시 우회됨
 
         // 2. userId 추출
         Long userId = jwtUtil.extractUserId(refreshToken, true);
@@ -52,37 +54,44 @@ public class AuthController {
         // 3. Redis에 저장된 refreshToken과 일치하는지 확인
         String savedToken = redisTemplate.opsForValue().get("RT:" + userId);
         if (savedToken == null || !savedToken.equals(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            //return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new CustomException(ErrorCode.MISMATCHED_REFRESH_TOKEN);
         }
 
         // 4. 사용자 조회
         com.Just_112_More.PicPle.user.domain.User user = userRepository.findOne(userId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자"));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 5. 새로운 accessToken 발급
         List<String> authorities = List.of(user.getRole().name());
         String newAccessToken = jwtUtil.createAccessToken(userId, authorities);
 
-        // 추가 : RefreshToken 만료 임박 시 재발급
+        // +) 추가 : RefreshToken 만료 임박 시 재발급
         Date expiration = jwtUtil.extractExpiration(refreshToken, true);
         long daysLeft = Duration.between(Instant.now(), expiration.toInstant()).toDays();
         String newRefreshToken = refreshToken;
 
         if (daysLeft < 3) {  // 임박 기준 : 3일 미만
             newRefreshToken = jwtUtil.createRefreshToken(userId);
-            redisTemplate.opsForValue().set("RT:" + userId, newRefreshToken, Duration.ofDays(14));
+            try {
+                redisTemplate.opsForValue().set("RT:" + userId, newRefreshToken, Duration.ofDays(14));
+            } catch (Exception e) {
+                throw new CustomException(ErrorCode.REDIS_SAVE_FAIL);
+            }
         }
-
-        return ResponseEntity.ok(new LoginResponse(newAccessToken, refreshToken));
+        return ResponseEntity.ok(ApiResponse.success(new LoginResponse(newAccessToken, refreshToken)));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<?>> logout(HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
+        if (token == null) {
+            throw new CustomException(ErrorCode.ACCESS_TOKEN_MISSING);
+        }
+        jwtUtil.validateAccessToken(token); // JWTExcetpion발생시 우회됨
+
         Long userId = jwtUtil.extractUserId(token, false);
         authService.logout(userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
-
-
 }
