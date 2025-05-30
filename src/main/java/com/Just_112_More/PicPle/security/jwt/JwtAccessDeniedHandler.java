@@ -17,14 +17,14 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
         //response.sendError(HttpServletResponse.SC_FORBIDDEN);
 
-        response.setContentType("application/json;charset=UTF-8");
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 
         ErrorCode errorCode = ErrorCode.ACCESS_DENIED;
-        String json = new ObjectMapper().writeValueAsString(
-                ApiResponse.fail(null, errorCode.name(), errorCode.getMessage())
-        );
-
+        ApiResponse<?> errorResponse = ApiResponse.fail(null, errorCode.name(), errorCode.getMessage());
+        String json = new ObjectMapper().writeValueAsString(errorResponse);
         response.getWriter().write(json);
+
     }
 }

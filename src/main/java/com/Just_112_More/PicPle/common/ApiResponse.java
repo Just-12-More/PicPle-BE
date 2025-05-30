@@ -1,7 +1,9 @@
 package com.Just_112_More.PicPle.common;
 
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class ApiResponse <T>{
     private boolean isSuccess;
     private T data;

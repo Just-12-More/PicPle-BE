@@ -23,11 +23,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
         ErrorCode errorCode = ErrorCode.NOT_LOGIN_USER;
-
-        String json = new ObjectMapper().writeValueAsString(
-                ApiResponse.fail(null, errorCode.name(), errorCode.getMessage())
-        );
-
+        ApiResponse<?> errorResponse = ApiResponse.fail(null, errorCode.name(), errorCode.getMessage());
+        String json = new ObjectMapper().writeValueAsString(errorResponse);
         response.getWriter().write(json);
     }
 }
