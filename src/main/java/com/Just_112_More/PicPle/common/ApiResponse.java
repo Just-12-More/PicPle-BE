@@ -1,7 +1,9 @@
 package com.Just_112_More.PicPle.common;
 
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class ApiResponse <T>{
     private boolean isSuccess;
     private T data;
@@ -22,7 +24,7 @@ public class ApiResponse <T>{
                 .build();
     }
 
-    private static <T> ApiResponse<T> fail(T data, String code, String message){
+    public static <T> ApiResponse<T> fail(T data, String code, String message){
         return ApiResponse.<T>builder()
                 .isSuccess(false)
                 .data(data)
