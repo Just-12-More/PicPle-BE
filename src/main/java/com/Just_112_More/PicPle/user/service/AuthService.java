@@ -1,5 +1,7 @@
 package com.Just_112_More.PicPle.user.service;
 
+import com.Just_112_More.PicPle.exception.CustomException;
+import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
 import com.Just_112_More.PicPle.security.oauth.OAuth2TokenVerifier;
 import com.Just_112_More.PicPle.security.oauth.OAuth2VerifierFactory;
@@ -40,8 +42,12 @@ public class AuthService {
         String accessToken = jwtUtil.createAccessToken(user.getId(), authorities);
         String refreshToken = jwtUtil.createRefreshToken(user.getId());
 
-        // Redis에 refreshToken 저장
-        redisTemplate.opsForValue().set("RT:" + user.getId(), refreshToken, Duration.ofDays(14));
+        try {
+            // Redis에 refreshToken 저장
+            redisTemplate.opsForValue().set("RT:" + user.getId(), refreshToken, Duration.ofDays(14));
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REDIS_SAVE_FAIL);
+        }
 
         return new LoginResponse(accessToken, refreshToken);
     }
