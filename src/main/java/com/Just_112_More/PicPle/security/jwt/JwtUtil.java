@@ -3,6 +3,7 @@ package com.Just_112_More.PicPle.security.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ import static com.Just_112_More.PicPle.security.jwt.JwtFilter.AUTHORIZATION_HEAD
 
 @Component
 @RequiredArgsConstructor
-public class JwtUtil implements InitializingBean {
+public class JwtUtil {
 
     private final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
@@ -38,15 +39,19 @@ public class JwtUtil implements InitializingBean {
     private Key accessKey;
     private Key refreshKey;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void init() throws Exception {
+        if (jwtProperties.getAccessSecret() == null || jwtProperties.getRefreshSecret() == null) {
+            throw new IllegalStateException("JWT secrets must not be null");
+        }
+
         this.accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getAccessSecret()));
         this.refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getRefreshSecret()));
         System.out.println("[DEBUG] accessSecret = " + jwtProperties.getAccessSecret());
         System.out.println("[DEBUG] refreshSecret = " + jwtProperties.getRefreshSecret());
     }
 
-    // AccessToken - 일반 요청 인증 용
+    // AccessToken - 일반 요청 인증용
     public String createAccessToken(Long userId, List<String> authorities) {
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
