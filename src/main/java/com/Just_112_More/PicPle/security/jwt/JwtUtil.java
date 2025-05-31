@@ -1,5 +1,7 @@
 package com.Just_112_More.PicPle.security.jwt;
 
+import com.Just_112_More.PicPle.exception.CustomException;
+import com.Just_112_More.PicPle.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -47,8 +49,6 @@ public class JwtUtil {
 
         this.accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getAccessSecret()));
         this.refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getRefreshSecret()));
-        System.out.println("[DEBUG] accessSecret = " + jwtProperties.getAccessSecret());
-        System.out.println("[DEBUG] refreshSecret = " + jwtProperties.getRefreshSecret());
     }
 
     // AccessToken - 일반 요청 인증용
@@ -56,7 +56,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("authorities", String.join(",", authorities))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getAccessTokenValidityInSeconds()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getAccessTokenValidityInSeconds() * 1000L))
                 .signWith(accessKey, SignatureAlgorithm.HS512)
                 .compact();
     }
@@ -65,7 +65,7 @@ public class JwtUtil {
     public String createRefreshToken(Long userId) {
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenValidityInSeconds()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenValidityInSeconds()* 1000L ))
                 .signWith(refreshKey, SignatureAlgorithm.HS512)
                 .compact();
     }
@@ -99,19 +99,29 @@ public class JwtUtil {
     }
 
     public boolean validate(String token, Key key) {
+        if (token == null || token.trim().isEmpty()) {
+            throw new CustomException(ErrorCode.EMPTY_TOKEN_ERROR);
+        }
+
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            logger.info("잘못된 JWT 서명입니다.");
+        } catch (SecurityException e) {
+            logger.info("JWT 서명 검증 실패");
+            throw new CustomException(ErrorCode.INVALID_TOKEN_SIGNATURE);
+        } catch (MalformedJwtException e) {
+            logger.warn("JWT 형식 오류");
+            throw new CustomException(ErrorCode.MALFORMED_TOKEN_ERROR);
         } catch (ExpiredJwtException e) {
-            logger.info("만료된 JWT 토큰입니다.");
+            logger.info("JWT 만료");
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
         } catch (UnsupportedJwtException e) {
-            logger.info("지원되지 않는 JWT 토큰입니다.");
+            logger.info("지원되지 않는 JWT 토큰 형식");
+            throw new CustomException(ErrorCode.UNSUPPORTED_TOKEN_ERROR);
         } catch (IllegalArgumentException e) {
-            logger.info("JWT 토큰이 잘못되었습니다.");
+            logger.warn("JWT 파싱 실패 - 비어있는 토큰 등");
+            throw new CustomException(ErrorCode.TOKEN_PARSING_FAILED);
         }
-        return false;
     }
 
     // 공통 메서드 - userId 추출
@@ -137,7 +147,7 @@ public class JwtUtil {
                 .getExpiration();
     }
 
-    // 공용 헤더의 accesstoken추출 메서드
+    // [공용] 헤더의 accesstoken추출 메서드
      public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
 
