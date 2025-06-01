@@ -7,3 +7,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+  cloud:
+    aws:
+      s3:
+        bucket: test
+      stack.auto: false
+      region.static: ap-northeast-2
+      credentials:
+        access-key: test
+        secret-key: test
