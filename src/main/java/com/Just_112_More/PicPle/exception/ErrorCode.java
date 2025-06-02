@@ -14,6 +14,7 @@ public enum ErrorCode {
 
     // user exception
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다."),
+    USER_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 탈퇴처리된 유저입니다." ),
 
     // jwt 내부 에러
     INVALID_TOKEN_SIGNATURE(HttpStatus.FORBIDDEN, "JWT 서명 검증 실패"),
@@ -33,7 +34,8 @@ public enum ErrorCode {
     INVALID_OAUTH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 SDK code입니다."),
     OAUTH_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "OAuth 인증 서버에 연결할 수 없습니다."),
     OAUTH_RESPONSE_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "OAuth 사용자 정보 응답이 잘못되었습니다."),
-    REDIS_SAVE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "리프레시 토큰 저장에 실패했습니다.");
+    REDIS_SAVE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "리프레시 토큰 저장에 실패했습니다."),
+    ;
 
     private final HttpStatus status;
     private final String message;
