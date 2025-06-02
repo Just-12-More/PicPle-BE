@@ -36,7 +36,17 @@ public class AuthService {
         OAuth2TokenVerifier verifier = verifierFactory.getVerifier(request.getProvider());
         OAuthUserInfo userInfo = verifier.verify(request.getAccessToken());
 
-        User user = userRepository.findByProviderAndProviderId(userInfo.getProvider(), userInfo.getProviderId())
+        Optional<User> optionalUser = userRepository.findByProviderAndProviderId(userInfo.getProvider(), userInfo.getProviderId());
+
+        User user = optionalUser
+                // 탈퇴회원 복구
+                .map( existing -> {
+                    if(existing.isDeleted()){
+                        existing.reactivate();
+                    }
+                    return existing;
+                })
+                // 신규 회원가입 처리
                 .orElseGet(() -> userRepository.save(User.fromOAuth(userInfo)));
 
         List<String> authorities = List.of(user.getRole().name());

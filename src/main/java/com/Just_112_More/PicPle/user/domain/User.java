@@ -90,6 +90,12 @@ public class User {
         this.deletedAt = LocalDateTime.now();
     }
 
+    // 재가입
+    public void reactivate() {
+        this.isDeleted = false;
+        this.deletedAt = null;
+    }
+
     public boolean isValid() {
         return !isDeleted || (deletedAt != null && deletedAt.isBefore(LocalDateTime.now()));
     }
