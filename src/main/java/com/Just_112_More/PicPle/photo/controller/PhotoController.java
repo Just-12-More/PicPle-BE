@@ -103,6 +103,8 @@ public class PhotoController {
                         .isLiked(false)
                         .address(photo.getLocationLabel())
                         .createdAt(photo.getPhotoCreate().toString())
+                        .latitude(photo.getLatitude())
+                        .longitude(photo.getLongitude())
                         .build())
                 .toList();
 
