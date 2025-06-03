@@ -5,8 +5,10 @@ import com.Just_112_More.PicPle.user.domain.User;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -14,6 +16,7 @@ public class PhotoRepository {
 
     private final EntityManager em;
 
+    @Transactional
     public void save(Photo photo) {
         if(photo.getId()==null){
             em.persist(photo);
@@ -23,6 +26,7 @@ public class PhotoRepository {
     }
 
     // 위치와 반경을 기준으로 근처 이미지들 조회
+    @Transactional
     public List<Photo> findPhotosByLocation(double latitude, double longitude, double radius){
         String jpql = "SELECT p FROM Photo p WHERE ST_DWithin(p.latitude, p.longitude, :latitude, :longitude, :radius)";
         return em.createQuery(jpql, Photo.class)
@@ -33,6 +37,7 @@ public class PhotoRepository {
     }
 
     // 이미지 삭제 (DB 레코드에서만 삭제처리)
+    @Transactional
     public void deleteById(Long photoId) {
         Photo photo = em.find(Photo.class, photoId);
         if (photo != null) {

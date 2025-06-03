@@ -41,8 +41,8 @@ public class PhotoController {
             User user = userRepository.findOne(userId)
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-            //String address = photoService.geoCoding(requestDto.getLatitude(), requestDto.getLongitude());
-            String address ="";
+            String address = photoService.geoCoding(requestDto.getLatitude(), requestDto.getLongitude());
+            //String address ="";
             Photo photo = Photo.builder()
                     .photoTitle(requestDto.getTitle())
                     .photoDesc(requestDto.getDescription())
