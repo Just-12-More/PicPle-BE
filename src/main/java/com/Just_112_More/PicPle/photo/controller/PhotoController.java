@@ -28,7 +28,7 @@ import java.util.List;
 @RequestMapping("/v1/photos")
 public class PhotoController {
 
-    @Value("${s3-url}")
+    @Value("${urls.s3}")
     private String s3Url;
 
     private final PhotoRepository photoRepository;
@@ -66,7 +66,7 @@ public class PhotoController {
             uploadPhotoDto dto = uploadPhotoDto.builder()
                     .id(photo.getId())
                     .title(photo.getPhotoTitle())
-                    .imgUrl(photo.getPhotoUrl())
+                    .imgUrl(s3Url + photo.getPhotoUrl())
                     .description(photo.getPhotoDesc())
                     .nickname(user.getUserName())
                     .profileImgUrl(user.getProfileUrl())
@@ -92,7 +92,6 @@ public class PhotoController {
     @PostMapping("/search/location")
     public ResponseEntity<ApiResponse<?>> getPhotosInRadius(
             @RequestBody photoSearchRequestDto requestDto) {
-
         List<Photo> photos = photoRepository.findPhotosByLocation(
                 requestDto.getLatitude(), requestDto.getLongitude(), requestDto.getRadius());
 
@@ -100,17 +99,17 @@ public class PhotoController {
                 .map(photo -> uploadPhotoDto.builder()
                         .id(photo.getId())
                         .title(photo.getPhotoTitle())
-                        .imgUrl(s3Url+photo.getPhotoUrl())
+                        .imgUrl(s3Url + photo.getPhotoUrl())
                         .description(photo.getPhotoDesc())
-                        .nickname(photo.getUser().getUserName())
-                        .profileImgUrl(photo.getUser().getProfileUrl())
-                        .likeCount(photo.getLikeCount())
-                        .isLiked(false)
-                        .address(photo.getLocationLabel())
-                        .createdAt(photo.getPhotoCreate().toString())
-                        .latitude(photo.getLatitude())
-                        .longitude(photo.getLongitude())
-                        .build())
+                .nickname(photo.getUser().getUserName())
+                .profileImgUrl(photo.getUser().getProfileUrl())
+                .likeCount(photo.getLikeCount())
+                .isLiked(false)
+                .address(photo.getLocationLabel())
+                .createdAt(photo.getPhotoCreate().toString())
+                .latitude(photo.getLatitude())
+                .longitude(photo.getLongitude())
+                .build())
                 .toList();
 
         photosResponseDto responseDto = photosResponseDto.builder()
