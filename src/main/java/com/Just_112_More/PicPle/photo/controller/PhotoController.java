@@ -13,8 +13,10 @@ import com.Just_112_More.PicPle.photo.service.PhotoService;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/v1/photos")
 public class PhotoController {
+
+    @Value("${s3-url}")
+    private String s3Url;
 
     private final PhotoRepository photoRepository;
     private final PhotoService photoService;
@@ -95,7 +100,7 @@ public class PhotoController {
                 .map(photo -> uploadPhotoDto.builder()
                         .id(photo.getId())
                         .title(photo.getPhotoTitle())
-                        .imgUrl(photo.getPhotoUrl())
+                        .imgUrl(s3Url+photo.getPhotoUrl())
                         .description(photo.getPhotoDesc())
                         .nickname(photo.getUser().getUserName())
                         .profileImgUrl(photo.getUser().getProfileUrl())
