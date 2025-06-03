@@ -16,6 +16,8 @@ public class uploadPhotoDto {
     private Boolean isLiked;
     private String address;
     private String createdAt;
+    private double latitude;
+    private double longitude;
 
     // 명시적 생성자 (Builder 사용 시 일반적으로 불필요하지만 원하면 추가 가능)
     public uploadPhotoDto(long id, String title, String imgUrl, String description,
@@ -31,5 +33,7 @@ public class uploadPhotoDto {
         this.isLiked = isLiked;
         this.address = address;
         this.createdAt = createdAt;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 }
