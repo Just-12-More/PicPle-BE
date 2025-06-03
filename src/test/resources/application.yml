@@ -1,21 +1,11 @@
 spring:
+  application:
+    name: PicPle
+  profiles:
+    active: default
+
   datasource:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
     username: sa
     password:
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-  cloud:
-    aws:
-      s3:
-        bucket: test
-      stack.auto: false
-      region.static: ap-northeast-2
-      credentials:
-        access-key: test
-        secret-key: test
-naver:
-  x-ncp-apigw-api-key-id: test
-  x-ncp-apigw-api-key: test
