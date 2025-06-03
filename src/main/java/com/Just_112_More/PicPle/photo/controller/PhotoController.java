@@ -30,7 +30,8 @@ public class PhotoController {
     private final PhotoService photoService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
-
+    
+    //이미지 s3에 올린 후 저장
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<?>> upload(
             HttpServletRequest request,
@@ -85,5 +86,5 @@ public class PhotoController {
                     .body(ApiResponse.fail(null, "INTERNAL_ERROR", "서버 오류가 발생했습니다."));
         }
     }
-
+    //
 }
