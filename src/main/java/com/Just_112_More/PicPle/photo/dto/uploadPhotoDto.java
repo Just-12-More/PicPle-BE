@@ -22,7 +22,7 @@ public class uploadPhotoDto {
     // 명시적 생성자 (Builder 사용 시 일반적으로 불필요하지만 원하면 추가 가능)
     public uploadPhotoDto(long id, String title, String imgUrl, String description,
                           String nickname, String profileImgUrl, int likeCount,
-                          Boolean isLiked, String address, String createdAt) {
+                          Boolean isLiked, String address, String createdAt,double latitude, double longitude) {
         this.id = id;
         this.title = title;
         this.imgUrl = imgUrl;
