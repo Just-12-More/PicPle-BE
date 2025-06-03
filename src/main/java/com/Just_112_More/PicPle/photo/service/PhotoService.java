@@ -27,7 +27,7 @@ public class PhotoService {
                 + "?request=coordsToaddr"
                 + "&coords=" + lon + "," + lat
                 + "&sourcecrs=epsg:4326"
-                + "&orders=admcode"
+                + "&orders=admcode,addr"
                 + "&output=json";
 
         try {
@@ -57,13 +57,13 @@ public class PhotoService {
                 // "addr" 또는 "roadaddr" 우선 사용
                 for (JsonNode node : results) {
                     String name = node.path("name").asText();
-                    if ("addr".equals(name) || "roadaddr".equals(name)) {
+                    if ("admcode".equals(name) || "addr".equals(name)) {
                         JsonNode region = node.path("region");
                         String area1 = region.path("area1").path("name").asText("");
                         String area2 = region.path("area2").path("name").asText("");
                         String area3 = region.path("area3").path("name").asText("");
-                        String area4 = region.path("area4").path("name").asText("");
-                        return String.join(" ", area1, area2, area3, area4).trim();
+                        //String area4 = region.path("area4").path("name").asText("");
+                        return String.join(" ", area1, area2, area3).trim();
                     }
                 }
             }
