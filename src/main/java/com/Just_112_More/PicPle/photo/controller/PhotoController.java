@@ -5,6 +5,7 @@ import com.Just_112_More.PicPle.exception.CustomException;
 import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.photo.dto.photoSearchRequestDto;
+import com.Just_112_More.PicPle.photo.dto.photosResponseDto;
 import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.dto.uploadPhotoRequestDto;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
@@ -84,20 +85,32 @@ public class PhotoController {
 
     //인접 반경 사진들 반환
     @PostMapping("/search/location")
-    public ResponseEntity<ApiResponse<?>> getPhotosByLocation(
-            @RequestBody photoSearchRequestDto requestDto
-    ) {
-        try {
-            List<Photo> photos = photoRepository.findPhotosByLocation(
-                    requestDto.getLatitude(),
-                    requestDto.getLongitude(),
-                    requestDto.getRadius()
-            );
+    public ResponseEntity<ApiResponse<?>> getPhotosInRadius(
+            @RequestBody photoSearchRequestDto requestDto) {
 
-            return ResponseEntity.ok(ApiResponse.success(photos)); // 필요 시 DTO 변환
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(null, "INTERNAL_ERROR", e.getMessage()));
-        }
+        List<Photo> photos = photoRepository.findPhotosByLocation(
+                requestDto.getLatitude(), requestDto.getLongitude(), requestDto.getRadius());
+
+        List<uploadPhotoDto> dtoList = photos.stream()
+                .map(photo -> uploadPhotoDto.builder()
+                        .id(photo.getId())
+                        .title(photo.getPhotoTitle())
+                        .imgUrl(photo.getPhotoUrl())
+                        .description(photo.getPhotoDesc())
+                        .nickname(photo.getUser().getUserName())
+                        .profileImgUrl(photo.getUser().getProfileUrl())
+                        .likeCount(photo.getLikeCount())
+                        .isLiked(false)
+                        .address(photo.getLocationLabel())
+                        .createdAt(photo.getPhotoCreate().toString())
+                        .build())
+                .toList();
+
+        photosResponseDto responseDto = photosResponseDto.builder()
+                .photos(dtoList)
+                .build();
+
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
+
 }
