@@ -24,3 +24,4 @@ spring:
 naver:
   x-ncp-apigw-api-key-id: test
   x-ncp-apigw-api-key: test
+s3-url: test.com
