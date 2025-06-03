@@ -13,8 +13,6 @@ import com.Just_112_More.PicPle.user.domain.User;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/v1/photos")
 public class PhotoController {
-    private static final Logger logger = LoggerFactory.getLogger(PhotoController.class);
 
     private final PhotoRepository photoRepository;
     private final PhotoService photoService;
@@ -72,15 +69,13 @@ public class PhotoController {
 
             return ResponseEntity.ok(ApiResponse.success(dto));
         } catch (CustomException e) {
-            logger.warn("📛 CustomException in upload(): {}", e.getMessage(), e);
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.fail(null, e.getErrorCode().name(), e.getMessage()));
         } catch (Exception e) {
-            logger.error("❌ Exception in upload(): {}", e.getMessage(), e);
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail(null, "INTERNAL_ERROR", "서버 오류가 발생했습니다."));
+                    .body(ApiResponse.fail(null, "INTERNAL_ERROR", e.getMessage()));
         }
     }
 }
