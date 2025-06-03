@@ -3,8 +3,7 @@ package com.Just_112_More.PicPle.photo.domain;
 import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.user.domain.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import java.util.List;
 @Entity
 @Getter
 @ToString(exclude = {"user", "photoLikes"})
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Photo {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,14 +26,11 @@ public class Photo {
 
     private String photoUrl;
 
-    private Double latitude;  // 위도
-
-    private Double longitude; // 경도
-
+    private Double latitude;
+    private Double longitude;
     private String locationLabel;
 
     private int likeCount = 0;
-
     private LocalDateTime photoCreate;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,6 +40,21 @@ public class Photo {
     @OneToMany(mappedBy = "photo", cascade = CascadeType.ALL)
     private List<Like> photoLikes = new ArrayList<>();
 
+    @Builder
+    public Photo(String photoTitle, String photoDesc, String photoUrl,
+                 Double latitude, Double longitude, String locationLabel) {
+        this.photoTitle = photoTitle;
+        this.photoDesc = photoDesc;
+        this.photoUrl = photoUrl;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.locationLabel = locationLabel;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @PrePersist
     public void prePersist() {
         if (this.photoCreate == null) {
@@ -50,27 +62,21 @@ public class Photo {
         }
     }
 
-    // 좋아요 수 계산 메서드
     public void calculateLikeCount() {
-        // 좋아요 리스트의 사이즈로 자동 계산
         this.likeCount = this.photoLikes.size();
     }
 
-    // 좋아요 추가
     public void addLike(Like like) {
         this.photoLikes.add(like);
-        calculateLikeCount();  // 좋아요 수 동기화
+        calculateLikeCount();
     }
 
-    // 좋아요 삭제
     public void removeLike(Like like) {
         this.photoLikes.remove(like);
-        calculateLikeCount();  // 좋아요 수 동기화
+        calculateLikeCount();
     }
 
-    // 사진위치완성
     public String getMapUrl() {
         return "https://www.google.com/maps?q=" + this.latitude + "," + this.longitude;
     }
-
 }

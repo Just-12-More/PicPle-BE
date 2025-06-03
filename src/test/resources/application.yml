@@ -16,3 +16,6 @@ spring:
       credentials:
         access-key: test
         secret-key: test
+naver:
+  x-ncp-apigw-api-key-id: test
+  x-ncp-apigw-api-key: test
