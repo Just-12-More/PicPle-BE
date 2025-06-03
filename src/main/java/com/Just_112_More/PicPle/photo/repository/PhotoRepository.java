@@ -27,14 +27,18 @@ public class PhotoRepository {
 
     // 위치와 반경을 기준으로 근처 이미지들 조회
     @Transactional
-    public List<Photo> findPhotosByLocation(double latitude, double longitude, double radius){
-        String jpql = "SELECT p FROM Photo p WHERE ST_DWithin(p.latitude, p.longitude, :latitude, :longitude, :radius)";
-        return em.createQuery(jpql, Photo.class)
-                .setParameter("latitude", latitude)
-                .setParameter("longitude", longitude)
-                .setParameter("radius", radius)
+    public List<Photo> findPhotosByLocation(double latitude, double longitude, double radiusKm) {
+        String sql = "SELECT p FROM Photo p WHERE " +
+                "(6371 * acos(cos(radians(:lat)) * cos(radians(p.latitude)) * " +
+                "cos(radians(p.longitude) - radians(:lon)) + sin(radians(:lat)) * sin(radians(p.latitude)))) < :radius";
+
+        return em.createQuery(sql, Photo.class)
+                .setParameter("lat", latitude)
+                .setParameter("lon", longitude)
+                .setParameter("radius", radiusKm)
                 .getResultList();
     }
+
 
     // 이미지 삭제 (DB 레코드에서만 삭제처리)
     @Transactional
