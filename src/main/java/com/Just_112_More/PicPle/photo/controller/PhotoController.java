@@ -61,7 +61,7 @@ public class PhotoController {
                     .description(photo.getPhotoDesc())
                     .nickname(user.getUserName())
                     .profileImgUrl(user.getProfileUrl())
-                    .likeCount(String.valueOf(photo.getLikeCount()))
+                    .likeCount(photo.getLikeCount())
                     .isLiked(false)
                     .address(photo.getLocationLabel())
                     .createdAt(photo.getPhotoCreate().toString())
