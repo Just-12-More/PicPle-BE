@@ -52,4 +52,10 @@ public class UserRepository {
         }
     }
 
+    public Optional<User> findeByIdAndIsDeletedFalse(Long id){
+        List<User> resultList = em.createQuery("SELECT u From User u WHERE u.id = :id AND u.isDeleted = false", User.class)
+                .setParameter("id", id)
+                .getResultList();
+        return resultList.stream().findFirst();
+    }
 }
