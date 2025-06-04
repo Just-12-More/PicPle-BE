@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +37,16 @@ public class AuthService {
         OAuthUserInfo userInfo = verifier.verify(request.getAccessToken());
 
         User user = userRepository.findByProviderAndProviderId(userInfo.getProvider(), userInfo.getProviderId())
-                .orElseGet(() -> userRepository.save(User.fromOAuth(userInfo)));
+                .orElseGet(() -> {
+                    User newUser = User.fromOAuth(userInfo);
+                    userRepository.save(newUser);
+
+                    String uuid = UUID.randomUUID().toString().substring(0, 5);
+                    String defaultNickname = "picple-user-" + newUser.getId() + "-" + uuid;
+
+                    newUser.setUserName(defaultNickname);
+                    return userRepository.save(newUser);
+                });
 
         List<String> authorities = List.of(user.getRole().name());
         String accessToken = jwtUtil.createAccessToken(user.getId(), authorities);

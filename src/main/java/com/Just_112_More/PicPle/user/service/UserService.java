@@ -45,7 +45,7 @@ public class UserService {
         User user = userRepository.findOne(userId).orElse(null);
         if (user != null) {
             user.setUserName(newNickname);  // 닉네임 수정
-            user.setProfileURL(newProfileImage);  // 프로필 사진 수정
+            user.setProfileUrl(newProfileImage);  // 프로필 사진 수정
             userRepository.save(user);  // 수정된 정보 저장
         }
     }

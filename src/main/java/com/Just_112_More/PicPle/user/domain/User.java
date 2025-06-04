@@ -40,6 +40,7 @@ public class User {
 
     private LocalDateTime deletedAt;
 
+    @Column(nullable = true)
     private String profileUrl;
 
     @OneToMany(mappedBy="user")
@@ -47,9 +48,6 @@ public class User {
 
     @OneToMany(mappedBy="user")
     private List<Like> userLikes = new ArrayList<>();
-
-    @Column(nullable = true)
-    private String profileURL;
 
     private User(Long id, String email, String providerId, LoginProvider provider, Role role, LocalDateTime joinedAt) {
         this.id = id;
