@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +36,17 @@ public class AuthService {
         OAuth2TokenVerifier verifier = verifierFactory.getVerifier(request.getProvider());
         OAuthUserInfo userInfo = verifier.verify(request.getAccessToken());
 
-        User user = userRepository.findByProviderAndProviderId(userInfo.getProvider(), userInfo.getProviderId())
+        Optional<User> optionalUser = userRepository.findByProviderAndProviderId(userInfo.getProvider(), userInfo.getProviderId());
+
+        User user = optionalUser
+                // 탈퇴회원 복구
+                .map( existing -> {
+                    if(existing.isDeleted()){
+                        existing.reactivate();
+                    }
+                    return existing;
+                })
+                // 신규 회원가입 처리
                 .orElseGet(() -> userRepository.save(User.fromOAuth(userInfo)));
 
         List<String> authorities = List.of(user.getRole().name());
@@ -54,5 +65,17 @@ public class AuthService {
 
     public void logout(Long userId){
         redisTemplate.delete("RT:"+userId);
+    }
+
+    public void withdraw(Long userId) {
+        User user = userRepository.findOne(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        try {
+            user.deleteUser();
+        } catch (IllegalStateException e){
+            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
+        }
+        userRepository.save(user);
     }
 }
