@@ -1,8 +1,11 @@
 package com.Just_112_More.PicPle.user.service;
 
+import com.Just_112_More.PicPle.exception.CustomException;
+import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.user.domain.User;
+import com.Just_112_More.PicPle.user.dto.ProfileDto;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -18,9 +22,21 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    // 사용자 정보 조회
+    // 사용자 조회
     public User getUserInfo(Long userId) {
         return userRepository.findOne(userId).orElse(null);
+    }
+
+    // 사용자 정보 조회( 닉네임, 프사 )
+    public ProfileDto getUsernameAndProfile(Long userId){
+        ProfileDto profileDto = userRepository.findUsernameAndProfile(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String defautImage = "";
+        if (profileDto.getProfileURL() == null || profileDto.getProfileURL().isEmpty()) {
+            profileDto.setProfileURL(defautImage);
+        }
+        return profileDto;
     }
 
     // 사용자 정보 수정( 닉네임, 프사 )
@@ -29,7 +45,7 @@ public class UserService {
         User user = userRepository.findOne(userId).orElse(null);
         if (user != null) {
             user.setUserName(newNickname);  // 닉네임 수정
-            user.setUserImageUrl(newProfileImage);  // 프로필 사진 수정
+            user.setProfileURL(newProfileImage);  // 프로필 사진 수정
             userRepository.save(user);  // 수정된 정보 저장
         }
     }

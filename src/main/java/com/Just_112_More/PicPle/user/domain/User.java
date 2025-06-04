@@ -33,8 +33,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private String userImageUrl;
-
     // @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean isDeleted = false;
 
@@ -49,6 +47,9 @@ public class User {
 
     @OneToMany(mappedBy="user")
     private List<Like> userLikes = new ArrayList<>();
+
+    @Column(nullable = true)
+    private String profileURL;
 
     private User(Long id, String email, String providerId, LoginProvider provider, Role role, LocalDateTime joinedAt) {
         this.id = id;

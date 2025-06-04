@@ -2,6 +2,7 @@ package com.Just_112_More.PicPle.user.repository;
 
 import com.Just_112_More.PicPle.user.domain.LoginProvider;
 import com.Just_112_More.PicPle.user.domain.User;
+import com.Just_112_More.PicPle.user.dto.ProfileDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
@@ -52,4 +53,12 @@ public class UserRepository {
         }
     }
 
+    public Optional<ProfileDto> findUsernameAndProfile(Long userId) {
+        List<ProfileDto> results = em.createQuery(
+                "select new com.Just_112_More.PicPle.user.dto.ProfileDto(u.userName, u.profileUrl)" +
+                        "from User u where u.id = :userId", ProfileDto.class)
+                .setParameter("userId", userId)
+                .getResultList();
+        return results.stream().findFirst();
+    }
 }
