@@ -1,22 +1,26 @@
 package com.Just_112_More.PicPle.photo.service;
 
+import com.Just_112_More.PicPle.exception.CustomException;
+import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.photo.dto.GetS3UrlDto;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.Headers;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -97,5 +101,28 @@ public class S3Service {
         return s3Object.getObjectContent();
     }
 
+    // Multipartfile 업로드 메서드
+    public String uploadObject(MultipartFile multipartFile){
+        try {
+            String uuidPart = UUID.randomUUID().toString().substring(0, 8); // UUID 앞 8글자
+            String timePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("mmssSSS")); // 분초밀리초 7글자
+            int randomNum = new Random().nextInt(100); // 0~99 난수
+            String randomPart = String.format("%02d", randomNum);
+            String key = uuidPart + timePart + randomPart;
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(multipartFile.getSize());
+            metadata.setContentType(multipartFile.getContentType());
+
+            //S3에 업로드
+            amazonS3Client.putObject(
+              new PutObjectRequest(bucket, key, multipartFile.getInputStream(), metadata)
+            );
+
+            return key;
+        } catch (IOException e){
+            throw new CustomException(ErrorCode.USER_IMAGE_UPLOAD_FAIL);
+        }
+    }
 
 }

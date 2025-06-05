@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,8 +30,7 @@ public class UserService {
 
     // 사용자 정보 조회( 닉네임, 프사 )
     public ProfileDto getUsernameAndProfile(Long userId){
-        Long validId = userRepository.findeByIdAndIsDeletedFalse(userId)
-                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND_OR_DELETED));
+        Long validId = validateUserId(userId);
 
         ProfileDto profileDto = userRepository.findUsernameAndProfile(validId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -44,13 +44,15 @@ public class UserService {
 
     // 사용자 정보 수정( 닉네임, 프사 )
     @Transactional
-    public void updateUserInfo(Long userId, String newNickname, String newProfileImage) {
-        User user = userRepository.findOne(userId).orElse(null);
-        if (user != null) {
-            user.setUserName(newNickname);  // 닉네임 수정
-            user.setProfilePath(newProfileImage);  // 프로필 사진 수정
-            userRepository.save(user);  // 수정된 정보 저장
-        }
+    public ProfileDto updateUsernameAndProfile(Long userId, String newNickname, String newProfileImage) {
+        User user = userRepository.findOne(userId)
+                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!user.getUserName().equals(newNickname)) user.setUserName(newNickname);  // 닉네임 수정
+        if (!user.getProfilePath().equals(newProfileImage)) user.setProfilePath(newProfileImage);  // 프로필 사진 수정
+        userRepository.save(user);  // 수정된 정보 저장
+
+        return new ProfileDto(newNickname, newProfileImage);
     }
 
     // 사용자가 업로드한 사진 목록 조회
@@ -68,5 +70,10 @@ public class UserService {
             photos.add(like.getPhoto());
         }
         return photos;
+    }
+
+    public Long validateUserId(Long userId){
+        return userRepository.findeByIdAndIsDeletedFalse(userId)
+                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND_OR_DELETED));
     }
 }

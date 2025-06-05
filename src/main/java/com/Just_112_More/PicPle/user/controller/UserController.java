@@ -16,9 +16,8 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,14 +47,26 @@ public class UserController {
             Resource resource = new InputStreamResource(is);
             //byte[] imageBytes = IOUtils.toByteArray(is);
             ProfileWithImageDto dto = new ProfileWithImageDto(profile.getUsername(), resource);
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)  // 콘텐츠 타입 설정
-                    .contentLength(resource.contentLength())
-                    .body(ApiResponse.success(dto));
+            return ResponseEntity.ok().body(ApiResponse.success(dto));
         } catch (IOException e){
             log.error("프로필 이미지 로드 실패, 사용자 ID: {}, 이미지 키: {}", userId, key, e);
-            throw new CustomException(ErrorCode.USER_IMAGE_FAIL);
+            throw new CustomException(ErrorCode.USER_IMAGE_GET_FAIL);
         }
     }
 
+    @PostMapping("/info")
+    public ResponseEntity<ApiResponse<?>> updateUserInfo(HttpServletRequest request,
+                     @RequestParam MultipartFile image, @RequestParam String nickname ){
+        String token = jwtUtil.resolveToken(request);
+        if (token == null) {
+            throw new CustomException(ErrorCode.ACCESS_TOKEN_MISSING);
+        }
+        jwtUtil.validateAccessToken(token);
+        Long userId = jwtUtil.extractUserId(token, false);
+
+        Long validId = userService.validateUserId(userId);
+        String key = s3Service.uploadObject(image);
+        ProfileDto profileDto = userService.updateUsernameAndProfile(validId, nickname, key);
+        return ResponseEntity.ok().body(ApiResponse.success(profileDto));
+    }
 }
