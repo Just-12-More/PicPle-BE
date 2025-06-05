@@ -28,15 +28,21 @@ public class JwtFilter extends GenericFilterBean {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         String jwt = jwtUtil.resolveToken(httpServletRequest);
         String requestURI = httpServletRequest.getRequestURI();
-        
-        if (StringUtils.hasText(jwt) && jwtUtil.validateAccessToken(jwt)) {
-            Authentication authentication = jwtUtil.getAuthenticationFromAccessToken(jwt);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            logger.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
-        } else {
-            logger.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
-        }
 
+        try{
+            if (StringUtils.hasText(jwt) && jwtUtil.validateAccessToken(jwt)) {
+                Authentication authentication = jwtUtil.getAuthenticationFromAccessToken(jwt);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                logger.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
+            } else {
+                logger.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
+            }
+        } catch(ExpiredJwtException e) {
+            // ExpiredJwtException을 CustomException으로 변환하여 던짐
+            logger.info("JWT 만료 처리");
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+        }
+        
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
