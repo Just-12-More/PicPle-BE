@@ -50,7 +50,7 @@ public class UserRepository {
 
     public Optional<ProfileDto> findUsernameAndProfile(Long userId) {
         List<ProfileDto> results = em.createQuery(
-                "select new com.Just_112_More.PicPle.user.dto.ProfileDto(u.userName, u.profileUrl)" +
+                "select new com.Just_112_More.PicPle.user.dto.ProfileDto(u.userName, u.profilePath)" +
                         "from User u where u.id = :userId", ProfileDto.class)
                 .setParameter("userId", userId)
                 .getResultList();

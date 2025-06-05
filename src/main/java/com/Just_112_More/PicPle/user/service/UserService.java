@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,6 +20,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserService userService;
 
     // 사용자 조회
     public User getUserInfo(Long userId) {
@@ -31,12 +31,13 @@ public class UserService {
     public ProfileDto getUsernameAndProfile(Long userId){
         Long validId = userRepository.findeByIdAndIsDeletedFalse(userId)
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND_OR_DELETED));
+
         ProfileDto profileDto = userRepository.findUsernameAndProfile(validId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        String defautImage = "";
+        // 프로필 이미지 비어있는 경우
         if (profileDto.getProfileURL() == null || profileDto.getProfileURL().isEmpty()) {
-            profileDto.setProfileURL(defautImage);
+            profileDto.setProfileURL("/profile/default-profile.jpeg");
         }
         return profileDto;
     }
@@ -47,7 +48,7 @@ public class UserService {
         User user = userRepository.findOne(userId).orElse(null);
         if (user != null) {
             user.setUserName(newNickname);  // 닉네임 수정
-            user.setProfileUrl(newProfileImage);  // 프로필 사진 수정
+            user.setProfilePath(newProfileImage);  // 프로필 사진 수정
             userRepository.save(user);  // 수정된 정보 저장
         }
     }

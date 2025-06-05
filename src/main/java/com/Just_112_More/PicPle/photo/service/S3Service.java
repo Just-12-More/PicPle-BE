@@ -3,14 +3,18 @@ package com.Just_112_More.PicPle.photo.service;
 import com.Just_112_More.PicPle.photo.dto.GetS3UrlDto;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
 import java.util.UUID;
@@ -84,6 +88,13 @@ public class S3Service {
         expTimeMillis += 1000 * 60; //만료시간 한시간
         expiration.setTime(expTimeMillis);
         return expiration;
+    }
+
+    // Multipartfile 조회메서드
+    public InputStream getObjectStream(String key){
+        GetObjectRequest getObjectRequest = new GetObjectRequest(bucket, key);
+        S3Object s3Object = amazonS3Client.getObject(getObjectRequest);
+        return s3Object.getObjectContent();
     }
 
 

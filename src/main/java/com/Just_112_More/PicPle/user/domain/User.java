@@ -41,7 +41,7 @@ public class User {
     private LocalDateTime deletedAt;
 
     @Column(nullable = true)
-    private String profileUrl;
+    private String profilePath;
 
     @OneToMany(mappedBy="user")
     private List<Photo> userPhotos = new ArrayList<>();
