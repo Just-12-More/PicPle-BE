@@ -27,8 +27,10 @@ public class JwtFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        try{
-            HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
+        try {
+
             String jwt = jwtUtil.resolveToken(httpServletRequest);
             String requestURI = httpServletRequest.getRequestURI();
             if (StringUtils.hasText(jwt) && jwtUtil.validateAccessToken(jwt)) {
@@ -38,12 +40,16 @@ public class JwtFilter extends GenericFilterBean {
             } else {
                 logger.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
             }
-        } catch(ExpiredJwtException e) {
-            // ExpiredJwtException을 CustomException으로 변환하여 던짐
+        } catch (CustomException e) {
             logger.info("JWT 만료 처리");
-            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+            ApiResponse<?> errorResponse = ApiResponse.fail(null, e.getErrorCode().name(), e.getErrorCode().getMessage());
+            String json = new ObjectMapper().writeValueAsString(errorResponse);
+            httpServletResponse.setCharacterEncoding("UTF-8");
+            httpServletResponse.setContentType("application/json;charset=UTF-8");
+            httpServletResponse.setStatus(e.getErrorCode().getStatus().value());
+            httpServletResponse.getWriter().write(json);
+            return; // 에러처리후 필터체인 종료
         }
-        
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
