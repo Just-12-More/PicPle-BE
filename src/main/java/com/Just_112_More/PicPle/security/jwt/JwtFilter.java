@@ -28,18 +28,13 @@ public class JwtFilter extends GenericFilterBean {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         String jwt = jwtUtil.resolveToken(httpServletRequest);
         String requestURI = httpServletRequest.getRequestURI();
-
-        try {
-            if (StringUtils.hasText(jwt) && jwtUtil.validateAccessToken(jwt)) {
-                Authentication authentication = jwtUtil.getAuthenticationFromAccessToken(jwt);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                logger.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
-            } else {
-                logger.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
-            }
-        } catch (CustomException e) {
-            // CustomException을 Spring Security가 이해할 수 있는 예외로 변환
-            throw e;
+        
+        if (StringUtils.hasText(jwt) && jwtUtil.validateAccessToken(jwt)) {
+            Authentication authentication = jwtUtil.getAuthenticationFromAccessToken(jwt);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            logger.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
+        } else {
+            logger.debug("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
         }
 
         filterChain.doFilter(servletRequest, servletResponse);
