@@ -10,6 +10,7 @@ build/
 .gradle/
 **/build/
 /src/main/resources/application.yml
+/src/main/resources/schema-dev.sql
 
 ### Eclipse ###
 .metadata
