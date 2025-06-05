@@ -41,12 +41,16 @@ public class PhotoRepository {
     }
 
     @Transactional
-    public List<Photo> findPhotosById(long id) {
-        String sql = "SELECT p FROM Photo p WHERE p.id = :id";
+    public List<Photo> findPhotosByLocation(double latitude, double longitude, long photo_id) {
+        String sql = "SELECT p FROM Photo p WHERE p.latitude = :latitude AND p.longitude = :longitude AND p.photo_id != :photo_id";
+
         return em.createQuery(sql, Photo.class)
-                .setParameter("id", id)
+                .setParameter("lat", latitude)
+                .setParameter("lon",longitude)
+                .setParameter("id", photo_id)
                 .getResultList();
     }
+
 
     @Transactional
     public Photo getPhotoById(long id) {
