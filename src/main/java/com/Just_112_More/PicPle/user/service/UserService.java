@@ -8,6 +8,7 @@ import com.Just_112_More.PicPle.user.domain.User;
 import com.Just_112_More.PicPle.user.dto.ProfileDto;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,6 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserService userService;
 
     // 사용자 조회
     public User getUserInfo(Long userId) {
@@ -37,7 +37,7 @@ public class UserService {
 
         // 프로필 이미지 비어있는 경우
         if (profileDto.getProfileURL() == null || profileDto.getProfileURL().isEmpty()) {
-            profileDto.setProfileURL("/profile/default-profile.jpeg");
+            profileDto.setProfileURL("profile/default-profile.jpeg");
         }
         return profileDto;
     }

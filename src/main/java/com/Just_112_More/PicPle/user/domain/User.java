@@ -40,7 +40,7 @@ public class User {
 
     private LocalDateTime deletedAt;
 
-    @Column(nullable = true)
+    @Column(nullable = true, name = "profile_path")
     private String profilePath;
 
     @OneToMany(mappedBy="user")
