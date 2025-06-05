@@ -119,4 +119,66 @@ public class PhotoController {
         return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
+    //현재 위치 사진들 반환
+    @GetMapping("/nearby")
+    public ResponseEntity<ApiResponse<?>> getNearbyPhotos(
+            HttpServletRequest request,
+            @RequestParam long photo_id
+    ){
+        List<Photo> photos = photoRepository.findPhotosById(photo_id);
+
+        List<uploadPhotoDto> dtoList = photos.stream()
+                .map(photo -> uploadPhotoDto.builder()
+                        .id(photo.getId())
+                        .title(photo.getPhotoTitle())
+                        .imgUrl(s3Url + photo.getPhotoUrl())
+                        .description(photo.getPhotoDesc())
+                        .nickname(photo.getUser().getUserName())
+                        .profileImgUrl(photo.getUser().getProfileUrl())
+                        .likeCount(photo.getLikeCount())
+                        .isLiked(false)
+                        .address(photo.getLocationLabel())
+                        .createdAt(photo.getPhotoCreate().toString())
+                        .latitude(photo.getLatitude())
+                        .longitude(photo.getLongitude())
+                        .build())
+                .toList();
+
+        photosResponseDto responseDto = photosResponseDto.builder()
+                .photos(dtoList)
+                .build();
+
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
+    }
+
+    //상세조회
+    @GetMapping("/details")
+    public ResponseEntity<ApiResponse<?>> getPhotoDetails(
+            HttpServletRequest request,
+            @RequestParam long photo_id
+    ) {
+    Photo photo = photoRepository.getPhotoById(photo_id);
+    User user = photo.getUser();
+
+    if (photo != null) {
+            uploadPhotoDto dto = uploadPhotoDto.builder()
+                    .id(photo.getId())
+                    .title(photo.getPhotoTitle())
+                    .imgUrl(s3Url + photo.getPhotoUrl())
+                    .description(photo.getPhotoDesc())
+                    .nickname(user.getUserName())
+                    .profileImgUrl(user.getProfileUrl())
+                    .likeCount(photo.getLikeCount())
+                    .isLiked(false)
+                    .address(photo.getLocationLabel())
+                    .createdAt(photo.getPhotoCreate().toString())
+                    .build();
+
+            return ResponseEntity.ok(ApiResponse.success(dto));
+    } else {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.fail(null, "INTERNAL_ERROR", "요청하신 사진이 없습니다."));
+        }
+    }
 }

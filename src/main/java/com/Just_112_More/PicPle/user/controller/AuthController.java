@@ -89,9 +89,22 @@ public class AuthController {
             throw new CustomException(ErrorCode.ACCESS_TOKEN_MISSING);
         }
         jwtUtil.validateAccessToken(token); // JWTExcetpion발생시 우회됨
-
         Long userId = jwtUtil.extractUserId(token, false);
+
         authService.logout(userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PostMapping("/withdrawal")
+    public ResponseEntity<ApiResponse<?>> withdraw(HttpServletRequest request){
+        String token = jwtUtil.resolveToken(request);
+        if(token==null){
+            throw new CustomException(ErrorCode.ACCESS_TOKEN_MISSING);
+        }
+        jwtUtil.validateAccessToken(token);
+        Long userId = jwtUtil.extractUserId(token, false);
+
+        authService.withdraw(userId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

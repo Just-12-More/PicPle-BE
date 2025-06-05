@@ -3,6 +3,7 @@ package com.Just_112_More.PicPle.photo.repository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.user.domain.User;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,25 @@ public class PhotoRepository {
                 .getResultList();
     }
 
+    @Transactional
+    public List<Photo> findPhotosById(long id) {
+        String sql = "SELECT p FROM Photo p WHERE p.id = :id";
+        return em.createQuery(sql, Photo.class)
+                .setParameter("id", id)
+                .getResultList();
+    }
+
+    @Transactional
+    public Photo getPhotoById(long id) {
+        String sql = "SELECT p FROM Photo p WHERE p.id = :id";
+        try {
+            return em.createQuery(sql, Photo.class)
+                    .setParameter("id", id)
+                    .getSingleResult(); // 단일 결과 반환
+        } catch (NoResultException e) {
+            return null; // ID로 찾는 결과가 없으면 null 반환
+        }
+    }
 
     // 이미지 삭제 (DB 레코드에서만 삭제처리)
     @Transactional
