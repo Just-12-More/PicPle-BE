@@ -75,6 +75,7 @@ public class AuthService {
         redisTemplate.delete("RT:"+userId);
     }
 
+    @Transactional
     public void withdraw(Long userId) {
         User user = userRepository.findOne(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));

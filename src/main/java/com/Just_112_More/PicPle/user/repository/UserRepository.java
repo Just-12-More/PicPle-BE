@@ -4,7 +4,6 @@ import com.Just_112_More.PicPle.user.domain.LoginProvider;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.Just_112_More.PicPle.user.dto.ProfileDto;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -41,11 +40,12 @@ public class UserRepository {
         return resultList.stream().findFirst();
     }
 
-    public Optional<User> findeByIdAndIsDeletedFalse(Long id) {
-        List<User> resultList = em.createQuery("SELECT u From User u WHERE u.id = :id AND u.isDeleted = false", User.class)
+    public Optional<Long> findeByIdAndIsDeletedFalse(Long id) {
+        List<Long> resultList = em.createQuery("SELECT u.id from User u WHERE u.id = :id AND u.isDeleted = false", Long.class)
                 .setParameter("id", id)
                 .getResultList();
-        return resultList.stream().findFirst();
+
+        return resultList.isEmpty() ? Optional.empty() : Optional.of(resultList.get(0));
     }
 
     public Optional<ProfileDto> findUsernameAndProfile(Long userId) {

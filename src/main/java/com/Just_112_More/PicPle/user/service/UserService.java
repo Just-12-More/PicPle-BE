@@ -29,7 +29,9 @@ public class UserService {
 
     // 사용자 정보 조회( 닉네임, 프사 )
     public ProfileDto getUsernameAndProfile(Long userId){
-        ProfileDto profileDto = userRepository.findUsernameAndProfile(userId)
+        Long validId = userRepository.findeByIdAndIsDeletedFalse(userId)
+                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND_OR_DELETED));
+        ProfileDto profileDto = userRepository.findUsernameAndProfile(validId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String defautImage = "";
@@ -47,16 +49,6 @@ public class UserService {
             user.setUserName(newNickname);  // 닉네임 수정
             user.setProfileUrl(newProfileImage);  // 프로필 사진 수정
             userRepository.save(user);  // 수정된 정보 저장
-        }
-    }
-
-    // 회원탈퇴 ( 논리적 삭제 )
-    @Transactional
-    public void deactivateUser(Long userId) {
-        User user = userRepository.findOne(userId).orElse(null);
-        if (user != null) {
-            user.deleteUser();  // 논리 삭제 처리
-            userRepository.save(user);  // 변경된 사용자 상태 저장
         }
     }
 

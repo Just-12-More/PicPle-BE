@@ -32,8 +32,6 @@ public class UserController {
         jwtUtil.validateAccessToken(token);
         Long userId = jwtUtil.extractUserId(token, false);
 
-        
-
         ProfileDto userInfo = userService.getUsernameAndProfile(userId);
         return ResponseEntity.ok(ApiResponse.success(userInfo));
     }
