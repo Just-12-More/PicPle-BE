@@ -30,27 +30,22 @@ public class UserRepository {
         return Optional.ofNullable(em.find(User.class, id));
     }
 
-    public Optional<User> findByUsername(String username) {
-        List<User> result = em.createQuery("SELECT u FROM User u WHERE u.userName = :username", User.class)
-                .setParameter("username", username)
+    public Optional<User> findByProviderAndProviderId(LoginProvider provider, String providerId) {
+        List<User> resultList = em.createQuery(
+                        "SELECT u FROM User u WHERE u.provider = :provider AND u.providerId = :providerId",
+                        User.class
+                )
+                .setParameter("provider", provider)
+                .setParameter("providerId", providerId)
                 .getResultList();
-        return result.stream().findAny();
+        return resultList.stream().findFirst();
     }
 
-    public Optional<User> findByProviderAndProviderId(LoginProvider provider, String providerId) {
-        try {
-            User user = em.createQuery(
-                            "SELECT u FROM User u WHERE u.provider = :provider AND u.providerId = :providerId",
-                            User.class
-                    )
-                    .setParameter("provider", provider)
-                    .setParameter("providerId", providerId)
-                    .getSingleResult();
-
-            return Optional.of(user);
-        } catch (NoResultException e) {
-            return Optional.empty();
-        }
+    public Optional<User> findeByIdAndIsDeletedFalse(Long id) {
+        List<User> resultList = em.createQuery("SELECT u From User u WHERE u.id = :id AND u.isDeleted = false", User.class)
+                .setParameter("id", id)
+                .getResultList();
+        return resultList.stream().findFirst();
     }
 
     public Optional<ProfileDto> findUsernameAndProfile(Long userId) {

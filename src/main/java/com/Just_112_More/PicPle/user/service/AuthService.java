@@ -37,6 +37,15 @@ public class AuthService {
         OAuthUserInfo userInfo = verifier.verify(request.getAccessToken());
 
         User user = userRepository.findByProviderAndProviderId(userInfo.getProvider(), userInfo.getProviderId())
+                // 탈퇴회원 복구
+                .map( existing -> {
+                    if(existing.isDeleted()) {
+                        existing.reactivate();
+                        userRepository.save(existing);
+                    }
+                    return existing;
+                })
+                // 신규회원가입처리(기본 사용자이름 지정)
                 .orElseGet(() -> {
                     User newUser = User.fromOAuth(userInfo);
                     userRepository.save(newUser);
@@ -64,5 +73,17 @@ public class AuthService {
 
     public void logout(Long userId){
         redisTemplate.delete("RT:"+userId);
+    }
+
+    public void withdraw(Long userId) {
+        User user = userRepository.findOne(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        try {
+            user.deleteUser();
+        } catch (IllegalStateException e){
+            throw new CustomException(ErrorCode.USER_ALREADY_DELETED);
+        }
+        userRepository.save(user);
     }
 }
