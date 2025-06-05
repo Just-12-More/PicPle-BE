@@ -39,7 +39,7 @@ public class JwtFilter extends GenericFilterBean {
             }
         } catch (CustomException e) {
             // CustomException을 Spring Security가 이해할 수 있는 예외로 변환
-            throw new e;
+            throw e;
         }
 
         filterChain.doFilter(servletRequest, servletResponse);
