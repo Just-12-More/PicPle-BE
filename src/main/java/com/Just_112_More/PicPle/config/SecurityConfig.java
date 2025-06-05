@@ -64,7 +64,7 @@ public class SecurityConfig {
                 // 인가 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-                        .requestMatchers("/v1/auth/login", "/v1/auth/reissue/token", "/test").permitAll()
+                        .requestMatchers("/v1/auth/login", "/v1/auth/reissue/token").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
