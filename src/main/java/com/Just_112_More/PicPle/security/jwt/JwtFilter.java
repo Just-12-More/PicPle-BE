@@ -1,11 +1,16 @@
 package com.Just_112_More.PicPle.security.jwt;
 
+import com.Just_112_More.PicPle.common.ApiResponse;
 import com.Just_112_More.PicPle.exception.CustomException;
+import com.Just_112_More.PicPle.exception.ErrorCode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
-import io.jsonwebtoken.ExpiredJwtException;
-import com.Just_112_More.PicPle.exception.ErrorCode;
 
 import java.io.IOException;
 
@@ -52,5 +55,4 @@ public class JwtFilter extends GenericFilterBean {
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }
-
 }
