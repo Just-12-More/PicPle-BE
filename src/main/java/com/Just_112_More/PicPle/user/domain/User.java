@@ -34,7 +34,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    // @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean isDeleted = false;
 
     private LocalDateTime userCreate;
@@ -59,8 +58,7 @@ public class User {
         this.userCreate = joinedAt;
     }
 
-    protected User() {
-    }
+    protected User() {}
 
     public static User fromOAuth(OAuthUserInfo info) {
         return new User(
@@ -94,10 +92,6 @@ public class User {
     public void reactivate() {
         this.isDeleted = false;
         this.deletedAt = null;
-    }
-
-    public boolean isValid() {
-        return !isDeleted || (deletedAt != null && deletedAt.isBefore(LocalDateTime.now()));
     }
 
 }
