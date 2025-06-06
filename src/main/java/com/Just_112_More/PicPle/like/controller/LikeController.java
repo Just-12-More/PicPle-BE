@@ -52,6 +52,6 @@ public class PhotoController {
         // 좋아요 추가 처리
         photoService.addLike(photo, user);
 
-        return ResponseEntity.ok(ApiResponse.success("Photo liked successfully."));
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }
