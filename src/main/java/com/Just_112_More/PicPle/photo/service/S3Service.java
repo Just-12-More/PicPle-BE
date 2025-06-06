@@ -108,7 +108,7 @@ public class S3Service {
             String timePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("mmssSSS")); // 분초밀리초 7글자
             int randomNum = new Random().nextInt(100); // 0~99 난수
             String randomPart = String.format("%02d", randomNum);
-            String key = uuidPart + timePart + randomPart;
+            String key = "profile/" + uuidPart + timePart + randomPart;
 
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(multipartFile.getSize());

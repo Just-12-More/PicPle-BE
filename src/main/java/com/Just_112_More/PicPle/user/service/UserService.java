@@ -5,10 +5,11 @@ import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.user.domain.User;
+import com.Just_112_More.PicPle.user.dto.NicknameDto;
 import com.Just_112_More.PicPle.user.dto.ProfileDto;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.Optional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -40,17 +42,28 @@ public class UserService {
         return profileDto;
     }
 
-    // 사용자 정보 수정( 닉네임, 프사 )
+    // 사용자 정보 수정( 프사 )
     @Transactional
-    public ProfileDto updateUsernameAndProfile(Long userId, String newNickname, String newProfileImage) {
+    public void updateProfile(Long userId, String newProfileImage) {
         User user = userRepository.findOne(userId)
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (!user.getUserName().equals(newNickname)) user.setUserName(newNickname);  // 닉네임 수정
-        if (!user.getProfilePath().equals(newProfileImage)) user.setProfilePath(newProfileImage);  // 프로필 사진 수정
-        userRepository.save(user);  // 수정된 정보 저장
+        if ( user.getProfilePath()==null || !user.getProfilePath().equals(newProfileImage)) user.setProfilePath(newProfileImage);
+        //userRepository.save(user);  // 수정된 정보 저장
+    }
 
-        return new ProfileDto(newNickname, newProfileImage);
+    // 사용자 정보 수정( 닉네임 )
+    @Transactional
+    public String updateUsername(Long userId, String newNickname) {
+        User user = userRepository.findOne(userId)
+                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        log.info("기존 닉네임: {}", user.getUserName());
+        if (user.getUserName()==null || !user.getUserName().equals(newNickname)) {
+            user.setUserName(newNickname);
+        }
+        //User updateUser = userRepository.save(user);// 수정된 정보 저장
+        return user.getUserName();
     }
 
     // 사용자가 업로드한 사진 목록 조회

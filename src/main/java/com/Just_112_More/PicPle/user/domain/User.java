@@ -24,6 +24,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private LoginProvider provider;
 
+    @Column(nullable = true, name = "user_name")
     private String userName;
 
     private String providerId;
