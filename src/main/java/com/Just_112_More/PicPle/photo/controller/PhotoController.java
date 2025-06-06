@@ -141,7 +141,7 @@ public class PhotoController {
                 .imgUrl(s3Url + centerPhoto.getPhotoUrl())
                 .description(centerPhoto.getPhotoDesc())
                 .nickname(centerPhoto.getUser().getUserName())
-                .profileImgUrl(centerPhoto.getUser().getProfileUrl())
+                .profileImgUrl(centerPhoto.getUser().getProfilePath())
                 .likeCount(centerPhoto.getLikeCount())
                 .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
                 .address(centerPhoto.getLocationLabel())
@@ -156,7 +156,7 @@ public class PhotoController {
                         .imgUrl(s3Url + photo.getPhotoUrl())
                         .description(photo.getPhotoDesc())
                         .nickname(photo.getUser().getUserName())
-                        .profileImgUrl(photo.getUser().getProfileUrl())
+                        .profileImgUrl(photo.getUser().getProfilePath())
                         .likeCount(photo.getLikeCount())
                         .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
                         .address(photo.getLocationLabel())
@@ -191,7 +191,7 @@ public class PhotoController {
                     .imgUrl(s3Url + photo.getPhotoUrl())
                     .description(photo.getPhotoDesc())
                     .nickname(user.getUserName())
-                    .profileImgUrl(user.getProfileUrl())
+                    .profileImgUrl(user.getProfilePath())
                     .likeCount(photo.getLikeCount())
                     .isLiked(false)
                     .address(photo.getLocationLabel())

@@ -3,6 +3,8 @@ package com.Just_112_More.PicPle.user.controller;
 import com.Just_112_More.PicPle.common.ApiResponse;
 import com.Just_112_More.PicPle.exception.CustomException;
 import com.Just_112_More.PicPle.exception.ErrorCode;
+import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.service.S3Service;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
 import com.Just_112_More.PicPle.user.dto.NicknameDto;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -103,9 +106,18 @@ public class UserController {
     @GetMapping("/photos")
     public ResponseEntity<ApiResponse<?>> getUserPhotos(HttpServletRequest request){
         Long userId = extractAndValidateUserId(request);
-
+        List<uploadPhotoDto> photosByUser = userService.getPhotosByUser(userId);
+        return ResponseEntity.ok().body(ApiResponse.success(photosByUser));
     }
 
+    @GetMapping("/likes")
+    public ResponseEntity<ApiResponse<?>> getUserLikes(HttpServletRequest request){
+        Long userId = extractAndValidateUserId(request);
+        List<uploadPhotoDto> LikePhotosByUser = userService.getLikedPhotosByUser(userId);
+        return ResponseEntity.ok().body(ApiResponse.success(LikePhotosByUser));
+    }
+
+    // 요청에서 accessToken추출 -> userId추출 -> 유효성(탈퇴여부) 체크
     private Long extractAndValidateUserId(HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         if (token == null) {

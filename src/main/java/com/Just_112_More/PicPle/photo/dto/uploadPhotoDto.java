@@ -36,4 +36,20 @@ public class uploadPhotoDto {
         this.latitude = latitude;
         this.longitude = longitude;
     }
+
+    @Builder(builderMethodName = "userPageBuilder")
+    public uploadPhotoDto(Long id, String title, String imgUrl, String description,
+                          String nickname, String profileImgUrl, int likeCount,
+                          Boolean isLiked, String address, String createdAt ){
+        this.id = id;
+        this.title = title;
+        this.imgUrl = imgUrl;
+        this.description = description;
+        this.nickname = nickname;
+        this.profileImgUrl = profileImgUrl;
+        this.likeCount = likeCount;
+        this.isLiked = isLiked;
+        this.address = address;
+        this.createdAt = createdAt;
+    }
 }
