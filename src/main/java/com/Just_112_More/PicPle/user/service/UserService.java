@@ -36,8 +36,8 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 프로필 이미지 비어있는 경우
-        if (profileDto.getProfileURL() == null || profileDto.getProfileURL().isEmpty()) {
-            profileDto.setProfileURL("profile/default-profile.jpeg");
+        if (profileDto.getProfilePath() == null || profileDto.getProfilePath().isEmpty()) {
+            profileDto.setProfilePath("profile/default-profile.jpeg");
         }
         return profileDto;
     }
