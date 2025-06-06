@@ -40,7 +40,7 @@ public class UserController {
         Long validId = userService.validateUserId(userId);
 
         ProfileDto profile = userService.getUsernameAndProfile(validId);
-        String key = profile.getProfileURL();
+        String key = profile.getProfilePath();
         log.info("S3 Key = {}", key);
 
         try{
