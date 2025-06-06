@@ -2,8 +2,8 @@ package com.Just_112_More.PicPle.user.repository;
 
 import com.Just_112_More.PicPle.user.domain.LoginProvider;
 import com.Just_112_More.PicPle.user.domain.User;
+import com.Just_112_More.PicPle.user.dto.ProfileDto;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -29,33 +29,31 @@ public class UserRepository {
         return Optional.ofNullable(em.find(User.class, id));
     }
 
-    public Optional<User> findByUsername(String username) {
-        List<User> result = em.createQuery("SELECT u FROM User u WHERE u.userName = :username", User.class)
-                .setParameter("username", username)
-                .getResultList();
-        return result.stream().findAny();
-    }
-
     public Optional<User> findByProviderAndProviderId(LoginProvider provider, String providerId) {
-        try {
-            User user = em.createQuery(
-                            "SELECT u FROM User u WHERE u.provider = :provider AND u.providerId = :providerId",
-                            User.class
-                    )
-                    .setParameter("provider", provider)
-                    .setParameter("providerId", providerId)
-                    .getSingleResult();
-
-            return Optional.of(user);
-        } catch (NoResultException e) {
-            return Optional.empty();
-        }
-    }
-
-    public Optional<User> findeByIdAndIsDeletedFalse(Long id){
-        List<User> resultList = em.createQuery("SELECT u From User u WHERE u.id = :id AND u.isDeleted = false", User.class)
-                .setParameter("id", id)
+        List<User> resultList = em.createQuery(
+                        "SELECT u FROM User u WHERE u.provider = :provider AND u.providerId = :providerId",
+                        User.class
+                )
+                .setParameter("provider", provider)
+                .setParameter("providerId", providerId)
                 .getResultList();
         return resultList.stream().findFirst();
+    }
+
+    public Optional<Long> findeByIdAndIsDeletedFalse(Long id) {
+        List<Long> resultList = em.createQuery("SELECT u.id from User u WHERE u.id = :id AND u.isDeleted = false", Long.class)
+                .setParameter("id", id)
+                .getResultList();
+
+        return resultList.isEmpty() ? Optional.empty() : Optional.of(resultList.get(0));
+    }
+
+    public Optional<ProfileDto> findUsernameAndProfile(Long userId) {
+        List<ProfileDto> results = em.createQuery(
+                "select new com.Just_112_More.PicPle.user.dto.ProfileDto(u.userName, u.profilePath)" +
+                        "from User u where u.id = :userId", ProfileDto.class)
+                .setParameter("userId", userId)
+                .getResultList();
+        return results.stream().findFirst();
     }
 }
