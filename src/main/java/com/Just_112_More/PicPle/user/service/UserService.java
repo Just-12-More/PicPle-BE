@@ -83,6 +83,7 @@ public class UserService {
         return photos;
     }
 
+    // 탈퇴여부 체킹
     public Long validateUserId(Long userId){
         return userRepository.findeByIdAndIsDeletedFalse(userId)
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND_OR_DELETED));

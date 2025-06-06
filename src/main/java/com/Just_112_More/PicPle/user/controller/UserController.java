@@ -31,15 +31,9 @@ public class UserController {
 
     @GetMapping("/info/profile")
     public ResponseEntity<Resource> getUserInfoProfile(HttpServletRequest request){
-        String token = jwtUtil.resolveToken(request);
-        if (token == null) {
-            throw new CustomException(ErrorCode.ACCESS_TOKEN_MISSING);
-        }
-        jwtUtil.validateAccessToken(token);
-        Long userId = jwtUtil.extractUserId(token, false);
-        Long validId = userService.validateUserId(userId);
+        Long userId = extractAndValidateUserId(request);
 
-        ProfileDto profile = userService.getUsernameAndProfile(validId);
+        ProfileDto profile = userService.getUsernameAndProfile(userId);
         String key = profile.getProfileURL();
         log.info("S3 Key = {}", key);
 
@@ -68,13 +62,9 @@ public class UserController {
 
     @GetMapping("/info/nickname")
     public ResponseEntity<ApiResponse<?>> getUserInfoName(HttpServletRequest request){
-        String token = jwtUtil.resolveToken(request);
-        if(token==null) throw new CustomException(ErrorCode.ACCESS_TOKEN_MISSING);
-        jwtUtil.validateAccessToken(token);
-        Long userId = jwtUtil.extractUserId(token, false);
-        Long validId = userService.validateUserId(userId);
+        Long userId = extractAndValidateUserId(request);
 
-        ProfileDto usernameAndProfile = userService.getUsernameAndProfile(validId);
+        ProfileDto usernameAndProfile = userService.getUsernameAndProfile(userId);
         String nickName = usernameAndProfile.getUsername();
         if(nickName==null) throw new CustomException(ErrorCode.USER_NAME_GET_FAIL);
         return ResponseEntity.ok().body(ApiResponse.success(nickName));
@@ -83,18 +73,12 @@ public class UserController {
     @PostMapping("/info/profile")
     public ResponseEntity<Resource> updateUserInfo( HttpServletRequest request,
                                                          @RequestParam MultipartFile image ){
-        String token = jwtUtil.resolveToken(request);
-        if (token == null) {
-            throw new CustomException(ErrorCode.ACCESS_TOKEN_MISSING);
-        }
-        jwtUtil.validateAccessToken(token);
-        Long userId = jwtUtil.extractUserId(token, false);
-        Long validId = userService.validateUserId(userId);
+        Long userId = extractAndValidateUserId(request);
 
         String key;
         try {
             key = s3Service.uploadObject(image);
-            userService.updateProfile(validId, key);
+            userService.updateProfile(userId, key);
 
             Resource resource = new InputStreamResource(image.getInputStream());
             HttpHeaders headers = new HttpHeaders();
@@ -111,16 +95,25 @@ public class UserController {
     @PostMapping("/info/nickname")
     public ResponseEntity<ApiResponse<?>> updateUserInfo( HttpServletRequest request,
                                                          @RequestBody NicknameDto nickName ){
+        Long userId = extractAndValidateUserId(request);
+        String newNickName = userService.updateUsername(userId, nickName.getNickName());
+        return ResponseEntity.ok().body(ApiResponse.success(new NicknameDto(newNickName)));
+    }
+
+    @GetMapping("/photos")
+    public ResponseEntity<ApiResponse<?>> getUserPhotos(HttpServletRequest request){
+        Long userId = extractAndValidateUserId(request);
+
+    }
+
+    private Long extractAndValidateUserId(HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         if (token == null) {
             throw new CustomException(ErrorCode.ACCESS_TOKEN_MISSING);
         }
         jwtUtil.validateAccessToken(token);
         Long userId = jwtUtil.extractUserId(token, false);
-        Long validId = userService.validateUserId(userId);
-
-        String newNickName = userService.updateUsername(validId, nickName.getNickName());
-        return ResponseEntity.ok().body(ApiResponse.success(new NicknameDto(newNickName)));
+        return userService.validateUserId(userId);
     }
 
 
