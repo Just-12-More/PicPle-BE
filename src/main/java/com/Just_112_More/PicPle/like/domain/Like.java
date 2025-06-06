@@ -4,10 +4,12 @@ import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.user.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "photo_like")
 public class Like {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

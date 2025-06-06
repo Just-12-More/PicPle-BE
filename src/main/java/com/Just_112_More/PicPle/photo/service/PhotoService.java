@@ -1,8 +1,9 @@
 package com.Just_112_More.PicPle.photo.service;
 
-import com.Just_112_More.PicPle.exception.CustomException;
-import com.Just_112_More.PicPle.exception.ErrorCode;
+import com.Just_112_More.PicPle.like.domain.Like;
+import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +29,7 @@ public class PhotoService {
     private String naverPw;
 
     private final PhotoRepository photoRepository;
+    private final LikeRepository likeRepository;
 
     public String geoCoding(Double lat, Double lon) {
         String requestUrl = "https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc"
