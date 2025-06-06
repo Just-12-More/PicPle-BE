@@ -1,5 +1,9 @@
 package com.Just_112_More.PicPle.photo.service;
 
+import com.Just_112_More.PicPle.exception.CustomException;
+import com.Just_112_More.PicPle.exception.ErrorCode;
+import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.user.domain.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +13,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -21,6 +26,8 @@ public class PhotoService {
 
     @Value("${naver.x-ncp-apigw-api-key}")
     private String naverPw;
+
+    private final PhotoRepository photoRepository;
 
     public String geoCoding(Double lat, Double lon) {
         String requestUrl = "https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc"
@@ -76,5 +83,14 @@ public class PhotoService {
         }
     }
 
+    @Transactional
+    public void addLike(Photo photo, User user) {
+        Like like = new Like();
+        like.setPhoto(photo);
+        like.setUser(user);
+        likeRepository.save(like);
 
+        photo.addLike(like);
+        photoRepository.save(photo);
+    }
 }
