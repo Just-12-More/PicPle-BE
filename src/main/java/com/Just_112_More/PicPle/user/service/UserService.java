@@ -30,9 +30,7 @@ public class UserService {
 
     // 사용자 정보 조회( 닉네임, 프사 )
     public ProfileDto getUsernameAndProfile(Long userId){
-        Long validId = validateUserId(userId);
-
-        ProfileDto profileDto = userRepository.findUsernameAndProfile(validId)
+        ProfileDto profileDto = userRepository.findUsernameAndProfile(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 프로필 이미지 비어있는 경우
