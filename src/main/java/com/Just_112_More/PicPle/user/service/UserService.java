@@ -3,7 +3,9 @@ package com.Just_112_More.PicPle.user.service;
 import com.Just_112_More.PicPle.exception.CustomException;
 import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.like.domain.Like;
+import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.dto.MyPagePhotoDto;
 import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.Just_112_More.PicPle.user.dto.NicknameDto;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
 
     // 사용자 조회
     public User getUserInfo(Long userId) {
@@ -69,47 +72,33 @@ public class UserService {
     }
 
     // 사용자가 업로드한 사진 목록 조회
-    public List<uploadPhotoDto> getPhotosByUser(Long userId) {
+    public List<MyPagePhotoDto> getPhotosByUser(Long userId) {
         User user = userRepository.findOne(userId)
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         return user.getUserPhotos().stream()
-                .map(photo -> uploadPhotoDto.userPageBuilder()
-                        .id(photo.getId())
-                        .title(photo.getPhotoTitle())
-                        .imgUrl("https://picple-pictures.s3.ap-northeast-2.amazonaws.com/" + photo.getPhotoUrl()) // 포토Url임? 지도 URL임?
-                        .description(photo.getPhotoDesc())
-                        .likeCount(photo.getLikeCount())
-                        .isLiked(false)
-                        .address(photo.getLocationLabel())
-                        .createdAt(photo.getPhotoCreate().toString())
-                        .build())
+                .map(photo -> new MyPagePhotoDto(
+                        photo.getId(),
+                        "https://picple-pictures.s3.ap-northeast-2.amazonaws.com/" + photo.getPhotoUrl()
+                ))
                 .collect(Collectors.toList());
     }
 
     // 사용자가 좋아요한 사진 목록 조회
-    public List<uploadPhotoDto> getLikedPhotosByUser(Long userId) {
+    public List<MyPagePhotoDto> getLikedPhotosByUser(Long userId) {
         User user = userRepository.findOne(userId)
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // User 엔티티의 userLikes 필드를 사용
-        List<Like> likes = user.getUserLikes();
-        List<Photo> photos = new ArrayList<>();
-        for (Like like : likes) {
-            photos.add(like.getPhoto());
-        }
+        List<Like> likePhotos = likeRepository.findLikesWithPhotoByUserId(userId);
 
-        return photos.stream()
-                .map(photo -> uploadPhotoDto.userPageBuilder()
-                        .id(photo.getId())
-                        .title(photo.getPhotoTitle())
-                        .imgUrl("https://picple-pictures.s3.ap-northeast-2.amazonaws.com/" + photo.getPhotoUrl())
-                        .description(photo.getPhotoDesc())
-                        .likeCount(photo.getLikeCount())
-                        .isLiked(false)
-                        .address(photo.getLocationLabel())
-                        .createdAt(photo.getPhotoCreate().toString())
-                        .build())
+        return likePhotos.stream()
+                .map(like -> {
+                    Photo photo = like.getPhoto();
+                    return new MyPagePhotoDto(
+                            photo.getId(),
+                            "https://picple-pictures.s3.ap-northeast-2.amazonaws.com/" + photo.getPhotoUrl()
+                    );
+                })
                 .collect(Collectors.toList());
     }
 

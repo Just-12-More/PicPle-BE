@@ -4,6 +4,7 @@ import com.Just_112_More.PicPle.common.ApiResponse;
 import com.Just_112_More.PicPle.exception.CustomException;
 import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.dto.MyPagePhotoDto;
 import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.service.S3Service;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
@@ -106,14 +107,14 @@ public class UserController {
     @GetMapping("/photos")
     public ResponseEntity<ApiResponse<?>> getUserPhotos(HttpServletRequest request){
         Long userId = extractAndValidateUserId(request);
-        List<uploadPhotoDto> photosByUser = userService.getPhotosByUser(userId);
+        List<MyPagePhotoDto> photosByUser = userService.getPhotosByUser(userId);
         return ResponseEntity.ok().body(ApiResponse.success(photosByUser));
     }
 
     @GetMapping("/likes")
     public ResponseEntity<ApiResponse<?>> getUserLikes(HttpServletRequest request){
         Long userId = extractAndValidateUserId(request);
-        List<uploadPhotoDto> LikePhotosByUser = userService.getLikedPhotosByUser(userId);
+        List<MyPagePhotoDto> LikePhotosByUser = userService.getLikedPhotosByUser(userId);
         return ResponseEntity.ok().body(ApiResponse.success(LikePhotosByUser));
     }
 
