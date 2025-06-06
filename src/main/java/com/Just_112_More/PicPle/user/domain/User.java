@@ -24,6 +24,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private LoginProvider provider;
 
+    @Column(nullable = true, name = "user_name")
     private String userName;
 
     private String providerId;
@@ -33,8 +34,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private String userImageUrl;
-
     // @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean isDeleted = false;
 
@@ -42,7 +41,8 @@ public class User {
 
     private LocalDateTime deletedAt;
 
-    private String profileUrl;
+    @Column(nullable = true, name = "profile_path")
+    private String profilePath;
 
     @OneToMany(mappedBy="user")
     private List<Photo> userPhotos = new ArrayList<>();

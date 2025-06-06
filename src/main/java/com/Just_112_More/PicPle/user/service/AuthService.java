@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,18 +36,26 @@ public class AuthService {
         OAuth2TokenVerifier verifier = verifierFactory.getVerifier(request.getProvider());
         OAuthUserInfo userInfo = verifier.verify(request.getAccessToken());
 
-        Optional<User> optionalUser = userRepository.findByProviderAndProviderId(userInfo.getProvider(), userInfo.getProviderId());
-
-        User user = optionalUser
+        User user = userRepository.findByProviderAndProviderId(userInfo.getProvider(), userInfo.getProviderId())
                 // 탈퇴회원 복구
                 .map( existing -> {
-                    if(existing.isDeleted()){
+                    if(existing.isDeleted()) {
                         existing.reactivate();
+                        userRepository.save(existing);
                     }
                     return existing;
                 })
-                // 신규 회원가입 처리
-                .orElseGet(() -> userRepository.save(User.fromOAuth(userInfo)));
+                // 신규회원가입처리(기본 사용자이름 지정)
+                .orElseGet(() -> {
+                    User newUser = User.fromOAuth(userInfo);
+                    userRepository.save(newUser);
+
+                    String uuid = UUID.randomUUID().toString().substring(0, 5);
+                    String defaultNickname = "picple-user-" + newUser.getId() + "-" + uuid;
+
+                    newUser.setUserName(defaultNickname);
+                    return userRepository.save(newUser);
+                });
 
         List<String> authorities = List.of(user.getRole().name());
         String accessToken = jwtUtil.createAccessToken(user.getId(), authorities);
@@ -67,6 +75,7 @@ public class AuthService {
         redisTemplate.delete("RT:"+userId);
     }
 
+    @Transactional
     public void withdraw(Long userId) {
         User user = userRepository.findOne(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
