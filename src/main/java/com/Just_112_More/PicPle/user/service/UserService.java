@@ -6,9 +6,7 @@ import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.photo.dto.MyPagePhotoDto;
-import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.user.domain.User;
-import com.Just_112_More.PicPle.user.dto.NicknameDto;
 import com.Just_112_More.PicPle.user.dto.ProfileDto;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +35,7 @@ public class UserService {
 
         // 프로필 이미지 비어있는 경우
         if (profileDto.getProfilePath() == null || profileDto.getProfilePath().isEmpty()) {
-            profileDto.setProfilePath("profile/default-profile.jpeg");
+            profileDto.setProfilePath("profile/default-profile.png");
         }
 
         String fullProfileUrl = "https://picple-pictures.s3.ap-northeast-2.amazonaws.com/" + profileDto.getProfilePath();
@@ -64,7 +62,7 @@ public class UserService {
 
         profileDto.setUsername(user.getUserName());
         if(user.getProfilePath()==null) {
-            profileDto.setProfilePath("profile/default-profile.jpeg");
+            profileDto.setProfilePath("profile/default-profile.png");
         } else {
             profileDto.setProfilePath(user.getProfilePath());
         }
