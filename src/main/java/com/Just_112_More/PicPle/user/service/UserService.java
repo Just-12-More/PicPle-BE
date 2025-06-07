@@ -35,7 +35,7 @@ public class UserService {
 
         // 프로필 이미지 비어있는 경우
         if (profileDto.getProfilePath() == null || profileDto.getProfilePath().isEmpty()) {
-            profileDto.setProfilePath("profile/default-profile.jpeg");
+            profileDto.setProfilePath("profile/default-profile.png");
         }
 
         String fullProfileUrl = "https://picple-pictures.s3.ap-northeast-2.amazonaws.com/" + profileDto.getProfilePath();
@@ -62,7 +62,7 @@ public class UserService {
 
         profileDto.setUsername(user.getUserName());
         if(user.getProfilePath()==null) {
-            profileDto.setProfilePath("profile/default-profile.jpeg");
+            profileDto.setProfilePath("profile/default-profile.png");
         } else {
             profileDto.setProfilePath(user.getProfilePath());
         }
