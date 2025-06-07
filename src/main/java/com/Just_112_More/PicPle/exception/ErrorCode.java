@@ -19,6 +19,7 @@ public enum ErrorCode {
     USER_IMAGE_GET_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "유저 프로필 이미지 다운로드에 실패했습니다."),
     USER_NAME_GET_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "유저 이름 로드에 실패했습니다." ),
     USER_IMAGE_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "유저 프로필 업로드에 실패했습니다." ),
+    USER_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "유저정보를 찾을 수 없습니다." ),
 
     // jwt 내부 에러
     INVALID_TOKEN_SIGNATURE(HttpStatus.FORBIDDEN, "JWT 서명 검증 실패"),
