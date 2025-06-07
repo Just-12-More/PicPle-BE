@@ -5,6 +5,7 @@ import com.Just_112_More.PicPle.exception.CustomException;
 import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.photo.dto.MyPagePhotoDto;
+import com.Just_112_More.PicPle.photo.dto.MyPagePhotoDtoList;
 import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.service.S3Service;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
@@ -64,14 +65,20 @@ public class UserController {
     public ResponseEntity<ApiResponse<?>> getUserPhotos(HttpServletRequest request){
         Long userId = extractAndValidateUserId(request);
         List<MyPagePhotoDto> photosByUser = userService.getPhotosByUser(userId);
-        return ResponseEntity.ok().body(ApiResponse.success(photosByUser));
+        MyPagePhotoDtoList photosByUserList = MyPagePhotoDtoList.builder()
+                .photos(photosByUser)
+                .build();
+        return ResponseEntity.ok().body(ApiResponse.success(photosByUserList));
     }
 
     @GetMapping("/likes")
     public ResponseEntity<ApiResponse<?>> getUserLikes(HttpServletRequest request){
         Long userId = extractAndValidateUserId(request);
-        List<MyPagePhotoDto> LikePhotosByUser = userService.getLikedPhotosByUser(userId);
-        return ResponseEntity.ok().body(ApiResponse.success(LikePhotosByUser));
+        List<MyPagePhotoDto> likePhotosByUser = userService.getLikedPhotosByUser(userId);
+        MyPagePhotoDtoList likePhotosByUserList = MyPagePhotoDtoList.builder()
+                .photos(likePhotosByUser)
+                .build();
+        return ResponseEntity.ok().body(ApiResponse.success(likePhotosByUserList));
     }
 
     // 요청에서 accessToken추출 -> userId추출 -> 유효성(탈퇴여부) 체크
