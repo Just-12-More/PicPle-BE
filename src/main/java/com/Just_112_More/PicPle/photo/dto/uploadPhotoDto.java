@@ -36,4 +36,5 @@ public class uploadPhotoDto {
         this.latitude = latitude;
         this.longitude = longitude;
     }
+
 }

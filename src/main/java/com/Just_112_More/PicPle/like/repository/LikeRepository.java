@@ -7,6 +7,8 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class LikeRepository {
@@ -28,5 +30,12 @@ public class LikeRepository {
                 .setParameter("photo", photo)
                 .getSingleResult();
         em.remove(like);
+    }
+
+    public List<Like> findLikesWithPhotoByUserId(Long userId) {
+        return em.createQuery(
+                        "SELECT l FROM Like l JOIN FETCH l.photo WHERE l.user.id = :userId", Like.class)
+                .setParameter("userId", userId)
+                .getResultList();
     }
 }
