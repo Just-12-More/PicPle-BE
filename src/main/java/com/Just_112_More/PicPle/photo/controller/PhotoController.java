@@ -72,6 +72,8 @@ public class PhotoController {
                     .isLiked(false)
                     .address(photo.getLocationLabel())
                     .createdAt(photo.getPhotoCreate().toString())
+                    .longitude(photo.getLongitude())
+                    .latitude(photo.getLatitude())
                     .build();
 
             return ResponseEntity.ok(ApiResponse.success(dto));
