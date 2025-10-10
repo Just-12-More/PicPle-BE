@@ -27,18 +27,44 @@ public class PhotoRepository {
     }
 
     // 위치와 반경을 기준으로 근처 이미지들 조회
+//    @Transactional
+//    public List<Photo> findPhotosByLocation(double latitude, double longitude, double radiusKm) {
+//        String sql = "SELECT p FROM Photo p WHERE " +
+//                "(6371 * acos(cos(radians(:lat)) * cos(radians(p.latitude)) * " +
+//                "cos(radians(p.longitude) - radians(:lon)) + sin(radians(:lat)) * sin(radians(p.latitude)))) < :radius";
+//
+//        return em.createQuery(sql, Photo.class)
+//                .setParameter("lat", latitude)
+//                .setParameter("lon", longitude)
+//                .setParameter("radius", radiusKm)
+//                .getResultList();
+//    }
+
     @Transactional
     public List<Photo> findPhotosByLocation(double latitude, double longitude, double radiusKm) {
+        // 1도 ≈ 111km, 위도 1도는 항상 동일하지만 경도는 위도에 따라 달라짐
+        double latRange = radiusKm / 111.0;
+        double lonRange = radiusKm / (111.0 * Math.cos(Math.toRadians(latitude)));
+
         String sql = "SELECT p FROM Photo p WHERE " +
-                "(6371 * acos(cos(radians(:lat)) * cos(radians(p.latitude)) * " +
+                "p.latitude BETWEEN :minLat AND :maxLat " +
+                "AND p.longitude BETWEEN :minLon AND :maxLon " +
+                "AND (6371 * acos(cos(radians(:lat)) * cos(radians(p.latitude)) * " +
                 "cos(radians(p.longitude) - radians(:lon)) + sin(radians(:lat)) * sin(radians(p.latitude)))) < :radius";
 
         return em.createQuery(sql, Photo.class)
+                // Bounding Box 파라미터
+                .setParameter("minLat", latitude - latRange)
+                .setParameter("maxLat", latitude + latRange)
+                .setParameter("minLon", longitude - lonRange)
+                .setParameter("maxLon", longitude + lonRange)
+                // 거리 계산용 파라미터
                 .setParameter("lat", latitude)
                 .setParameter("lon", longitude)
                 .setParameter("radius", radiusKm)
                 .getResultList();
     }
+
 
     @Transactional
     public List<Photo> findPhotosByLocation(String locationLabel, long photo_id) {
