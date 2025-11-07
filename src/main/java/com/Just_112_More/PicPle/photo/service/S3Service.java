@@ -72,10 +72,12 @@ public class S3Service {
                 .withMethod(HttpMethod.PUT)
                 .withKey(filename)
                 .withExpiration(expiration);
+        /*
         generatePresignedUrlRequest.addRequestParameter(
                 Headers.S3_CANNED_ACL,
                 CannedAccessControlList.PublicRead.toString()
         );
+         */
         return generatePresignedUrlRequest;
     }
 
@@ -89,7 +91,7 @@ public class S3Service {
     private static Date getExpiration() {
         Date expiration = new Date();
         long expTimeMillis = expiration.getTime();
-        expTimeMillis += 1000 * 60; //만료시간 한시간
+        expTimeMillis += 1000 * 60 * 10; //만료시간 10분
         expiration.setTime(expTimeMillis);
         return expiration;
     }
