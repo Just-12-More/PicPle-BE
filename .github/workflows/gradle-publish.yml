@@ -30,7 +30,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: picple/was:latest 
+          tags: picple/spring-app:latest 
 
       - name: 배포
         uses: appleboy/ssh-action@v1.0.3
