@@ -10,6 +10,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class TestSocketController {
+
     private final SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/test-hot")
