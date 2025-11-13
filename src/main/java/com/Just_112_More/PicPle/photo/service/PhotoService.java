@@ -3,6 +3,7 @@ package com.Just_112_More.PicPle.photo.service;
 import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +34,7 @@ public class PhotoService {
     private final PhotoRepository photoRepository;
     private final LikeRepository likeRepository;
 
-    public String geoCoding(Double lat, Double lon) {
+    public String reverseGeoCoding(Double lat, Double lon) {
         String requestUrl = "https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc"
                 + "?request=coordsToaddr"
                 + "&coords=" + lon + "," + lat
@@ -85,6 +88,61 @@ public class PhotoService {
         }
     }
 
+    public List<String> geoCoding(String localLabel){
+        List<String> locationResult = new ArrayList<>();
+
+        String requestUrl = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode"
+                + "?query=" + localLabel
+                + "&output=json";
+
+        try{
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpGet request = new HttpGet(requestUrl);
+
+            request.addHeader("x-ncp-apigw-api-key-id", naverKey);
+            request.addHeader("x-ncp-apigw-api-key", naverPw);
+
+            HttpResponse response = client.execute(request);
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+
+            StringBuilder result = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            reader.close();
+
+            // JSON 파싱
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(result.toString());
+
+            JsonNode results = root.path("addresses");
+            if (results.isArray() && results.size() > 0) {
+                JsonNode address = results.get(0);
+                String latitude = address.path("y").asText(); // 위도
+                String longitude = address.path("x").asText(); // 경도
+
+                // 위도와 경도 반환
+                locationResult.add(latitude);
+                locationResult.add(longitude);
+
+                return locationResult;
+            }
+
+            // 위치 정보 없음 반환
+            locationResult.add("위치 정보 없음");
+            return locationResult;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            // 예외 발생 시 실패 메시지 추가
+            locationResult.add("위치 정보 파싱 실패");
+            return locationResult;
+        }
+    }
+
     @Transactional
     public void addLike(Photo photo, User user) {
         Like like = new Like();
@@ -94,5 +152,9 @@ public class PhotoService {
 
         photo.addLike(like);
         photoRepository.save(photo);
+    }
+
+    public List<Photo> getPhotosByLocation(String locationLabel) {
+        return photoRepository.findByLocationLabel(locationLabel);
     }
 }

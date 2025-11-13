@@ -98,4 +98,10 @@ public class PhotoRepository {
         }
     }
 
+    public List<Photo> findByLocationLabel(String locationLabel) {
+        String sql = "SELECT p FROM Photo p WHERE p.locationLabel = :locationLabel";
+        return em.createQuery(sql, Photo.class)
+                .setParameter("locationLabel", locationLabel).getResultList();
+    }
+
 }
