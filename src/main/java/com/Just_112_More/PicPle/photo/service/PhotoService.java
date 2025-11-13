@@ -34,12 +34,16 @@ public class PhotoService {
     private final PhotoRepository photoRepository;
     private final LikeRepository likeRepository;
 
-    public String reverseGeoCoding(Double lat, Double lon) {
+    public List<String> reverseGeoCoding(Double lat, Double lon) {
+        List<String> reverseGeoCoding = new ArrayList<>();
+        String roadAddress = null; // 도로명 주소
+        String defaultAddress = null; // 일반 주소 (fallback)
+
         String requestUrl = "https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc"
                 + "?request=coordsToaddr"
                 + "&coords=" + lon + "," + lat
                 + "&sourcecrs=epsg:4326"
-                + "&orders=admcode,addr"
+                + "&orders=admcode,addr,roadaddr"
                 + "&output=json";
 
         try {
@@ -66,25 +70,61 @@ public class PhotoService {
 
             JsonNode results = root.path("results");
             if (results.isArray() && results.size() > 0) {
-                // "addr" 또는 "roadaddr" 우선 사용
+
                 for (JsonNode node : results) {
                     String name = node.path("name").asText();
+
+                    // (1) 도로명 주소 파싱 (roadAddress)
+                    if ("roadaddr".equals(name)) {
+                        JsonNode region = node.path("region");
+                        JsonNode land = node.path("land");
+
+                        String area1 = region.path("area1").path("name").asText("");
+                        String area2 = region.path("area2").path("name").asText("");
+                        String roadName = land.path("name").asText("");
+                        String number1 = land.path("number1").asText("");
+
+                        if (!area1.isEmpty() && !area2.isEmpty() && !roadName.isEmpty()) {
+                            StringBuilder sb = new StringBuilder();
+                            sb.append(area1).append(" ")
+                                    .append(area2).append(" ")
+                                    .append(roadName)
+                                    .append(number1);
+                            roadAddress = sb.toString().trim();
+                            reverseGeoCoding.add(roadAddress);
+                        }
+                    }
+
+                    // (2) 일반 법정동 주소 (defaultAddress)
                     if ("admcode".equals(name) || "addr".equals(name)) {
                         JsonNode region = node.path("region");
                         String area1 = region.path("area1").path("name").asText("");
                         String area2 = region.path("area2").path("name").asText("");
                         String area3 = region.path("area3").path("name").asText("");
                         //String area4 = region.path("area4").path("name").asText("");
-                        return String.join(" ", area1, area2, area3).trim();
+                        defaultAddress = String.join(" ", area1, area2, area3).trim();
+                        reverseGeoCoding.add(defaultAddress);
                     }
                 }
             }
 
-            return "주소 정보 없음";
+            if (reverseGeoCoding.isEmpty()) {
+                reverseGeoCoding.add(
+                        roadAddress != null ? roadAddress : "도로명 정보 없음"
+                );
+                reverseGeoCoding.add(
+                        defaultAddress != null ? defaultAddress : "주소 정보 없음"
+                );
+            }
+
+            return reverseGeoCoding;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "주소 파싱 실패";
+            return List.of(
+                    roadAddress != null ? roadAddress : "도로명 정보 없음",
+                    defaultAddress != null ? defaultAddress : "주소 정보 없음"
+            );
         }
     }
 

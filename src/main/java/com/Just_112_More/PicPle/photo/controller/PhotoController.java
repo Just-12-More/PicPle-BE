@@ -48,7 +48,7 @@ public class PhotoController {
             User user = userRepository.findOne(userId)
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-            String address = photoService.reverseGeoCoding(requestDto.getLatitude(), requestDto.getLongitude());
+            List<String> addressList = photoService.reverseGeoCoding(requestDto.getLatitude(), requestDto.getLongitude());
             //String address ="";
             Photo photo = Photo.builder()
                     .photoTitle(requestDto.getTitle())
@@ -56,10 +56,13 @@ public class PhotoController {
                     .photoUrl(requestDto.getPhotoUrl())
                     .latitude(requestDto.getLatitude())
                     .longitude(requestDto.getLongitude())
-                    .locationLabel(address)
+                    .roadAddress(addressList.get(0))
+                    .locationLabel(addressList.get(1))
                     .build();
             photo.setUser(user);
             photoRepository.save(photo);
+
+            // ++++)))) localStat에서 검색후 증가
 
             uploadPhotoDto dto = uploadPhotoDto.builder()
                     .id(photo.getId())
