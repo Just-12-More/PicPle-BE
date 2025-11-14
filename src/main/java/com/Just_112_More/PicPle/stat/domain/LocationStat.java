@@ -17,6 +17,8 @@ public class LocationStat {
 
     private String locationLabel;
 
+    private String roadAddress;
+
     private int photoCnt = 0;
 
     private LocalDateTime lastUpdateTime;

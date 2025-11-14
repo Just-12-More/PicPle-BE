@@ -9,6 +9,7 @@ import java.util.List;
 @Builder
 @Getter
 public class HotPlaceResponse {
+    private int order;
     private String locationLabel;
     private int photoCnt;
     private String latitude;

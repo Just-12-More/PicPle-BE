@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface LocationStatRepository extends JpaRepository<LocationStat, Long> {
 
-    @Query(value = "SELECT * FROM LOCATION_STAT ORDER BY PHOTO_CNT DESC LIMIT 10", nativeQuery = true)
+    @Query(value = "SELECT * FROM location_stat ORDER BY photo_cnt DESC LIMIT 10", nativeQuery = true)
     public List<LocationStat> findTop10ByOrderByPhotoCntDesc();
 }

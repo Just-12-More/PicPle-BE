@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,11 +130,12 @@ public class PhotoService {
         }
     }
 
-    public List<String> geoCoding(String localLabel){
+    public List<String> geoCoding(String roadAddress) {
         List<String> locationResult = new ArrayList<>();
 
+        String encodedAddress = URLEncoder.encode(roadAddress, StandardCharsets.UTF_8);
         String requestUrl = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode"
-                + "?query=" + localLabel
+                + "?query=" + encodedAddress
                 + "&output=json";
 
         try{
@@ -160,25 +163,29 @@ public class PhotoService {
             JsonNode results = root.path("addresses");
             if (results.isArray() && results.size() > 0) {
                 JsonNode address = results.get(0);
-                String latitude = address.path("y").asText(); // 위도
-                String longitude = address.path("x").asText(); // 경도
+
+                String longitude = address.path("x").asText();  // 경도
+                String latitude = address.path("y").asText();   // 위도
 
                 // 위도와 경도 반환
-                locationResult.add(latitude);
-                locationResult.add(longitude);
+                locationResult.add(latitude);   // [0] 위도
+                locationResult.add(longitude);  // [1] 경도
 
                 return locationResult;
             }
 
-            // 위치 정보 없음 반환
-            locationResult.add("위치 정보 없음");
+            // 주소가 없을 때
+            locationResult.add("0.0");  // 위도 없음
+            locationResult.add("0.0");  // 경도 없음
+
             return locationResult;
 
         } catch (Exception e) {
             e.printStackTrace();
 
-            // 예외 발생 시 실패 메시지 추가
-            locationResult.add("위치 정보 파싱 실패");
+            // 예외 발생 시
+            locationResult.add("0.0");
+            locationResult.add("0.0");
             return locationResult;
         }
     }

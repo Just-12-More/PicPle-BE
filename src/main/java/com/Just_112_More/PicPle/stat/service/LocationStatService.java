@@ -8,6 +8,8 @@ import com.Just_112_More.PicPle.stat.dto.HotPlaceResponse;
 import com.Just_112_More.PicPle.stat.dto.HotPlaceResponseList;
 import com.Just_112_More.PicPle.stat.repository.LocationStatRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LocationStatService {
 
     @Value("${urls.s3}")
@@ -29,17 +32,27 @@ public class LocationStatService {
 
         // photoCnt가 높은 순으로 10개 조회
         List<LocationStat> topLocations = locationStatRepository.findTop10ByOrderByPhotoCntDesc();
+        log.info("쿼리 결과: {}개", topLocations.size());
 
         List<HotPlaceResponse> results = new ArrayList<>();
 
-        for(LocationStat locationStat : topLocations){
+        for(int i = 0; i < topLocations.size(); i++){
+            LocationStat locationStat = topLocations.get(i);
+            log.info("처리 중: {} / {}", locationStat.getLocationLabel(), locationStat.getRoadAddress());
+
             // 위치 라벨로 geocoding을 통해 위도, 경도 조회
-            List<String> geoData = photoService.geoCoding(locationStat.getLocationLabel());
+            if ("도로명 정보 없음".equals(locationStat.getRoadAddress())) {
+                log.info("건너뜀: {}", locationStat.getLocationLabel());
+                continue;
+            }
+            List<String> geoData = photoService.geoCoding(locationStat.getRoadAddress());
+            log.info("Geo 결과: {}", geoData);
             String latitude = geoData.get(0);  // 위도
             String longitude = geoData.get(1);  // 경도
 
             // 사진 리스트 가져오기
             List<Photo> photos = photoService.getPhotosByLocation(locationStat.getLocationLabel());
+            log.info("연결된 사진: {}개", photos.size());
 
             List<uploadPhotoDto> photoList = photos.stream()
                     .map( photo -> uploadPhotoDto.builder()
@@ -58,6 +71,7 @@ public class LocationStatService {
                     .collect(Collectors.toList());
 
             HotPlaceResponse hotPlaceResponse = HotPlaceResponse.builder()
+                    .order(i + 1)
                     .locationLabel(locationStat.getLocationLabel())
                     .photoCnt(locationStat.getPhotoCnt())
                     .latitude(latitude)
@@ -66,7 +80,9 @@ public class LocationStatService {
                     .build();
 
             results.add(hotPlaceResponse);
+
         }
+        log.info("총 결과 개수 = {}", results.size());
 
         return HotPlaceResponseList.builder()
                 .hotplaces(results)

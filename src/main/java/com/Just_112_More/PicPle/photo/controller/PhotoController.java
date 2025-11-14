@@ -62,7 +62,7 @@ public class PhotoController {
             photo.setUser(user);
             photoRepository.save(photo);
 
-            // ++++)))) localStat에서 검색후 증가
+            // ++++)))) localStat에서 검색후 있다면 증가, 없다면 추가!
 
             uploadPhotoDto dto = uploadPhotoDto.builder()
                     .id(photo.getId())
