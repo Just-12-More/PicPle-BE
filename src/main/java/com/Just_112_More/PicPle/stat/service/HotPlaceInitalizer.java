@@ -15,7 +15,7 @@ public class HotPlaceInitalizer {
 
     @PostConstruct
     public void initTop10Cache() {
-        HotPlaceResponseList top10 = locationStatService.getTop10LocationStats();
+        HotPlaceResponseList top10 = locationStatService.calculateTop10FromDB();
         hotPlaceService.saveTop10Cache(top10);
         log.info("[초기화 작업] Redis에 초기 TOP10 핫플레이스 캐시 저장 완료");
     }

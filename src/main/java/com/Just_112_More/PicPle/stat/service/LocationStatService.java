@@ -29,10 +29,11 @@ public class LocationStatService {
     private final LocationStatRepository locationStatRepository;
     private final PhotoService photoService;
 
-    public HotPlaceResponseList getTop10LocationStats() {
+    public HotPlaceResponseList calculateTop10FromDB() {
 
         // photoCnt가 높은 순으로 10개 조회
         List<LocationStat> topLocations = locationStatRepository.findTop10ByOrderByPhotoCntDesc();
+
         log.info("쿼리 결과: {}개", topLocations.size());
 
         List<HotPlaceResponse> results = new ArrayList<>();
