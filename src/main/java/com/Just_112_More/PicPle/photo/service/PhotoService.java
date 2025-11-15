@@ -76,7 +76,17 @@ public class PhotoService {
                 for (JsonNode node : results) {
                     String name = node.path("name").asText();
 
-                    // (1) 도로명 주소 파싱 (roadAddress)
+                    // (1) 일반 법정동 주소 (defaultAddress)
+                    if ("admcode".equals(name) ) {
+                        JsonNode region = node.path("region");
+                        String area1 = region.path("area1").path("name").asText("");
+                        String area2 = region.path("area2").path("name").asText("");
+                        String area3 = region.path("area3").path("name").asText("");
+                        //String area4 = region.path("area4").path("name").asText("");
+                        defaultAddress = String.join(" ", area1, area2, area3).trim();
+                    }
+
+                    // (2) 도로명 주소 파싱 (roadAddress)
                     if ("roadaddr".equals(name)) {
                         JsonNode region = node.path("region");
                         JsonNode land = node.path("land");
@@ -93,40 +103,18 @@ public class PhotoService {
                                     .append(roadName)
                                     .append(number1);
                             roadAddress = sb.toString().trim();
-                            reverseGeoCoding.add(roadAddress);
                         }
-                    }
-
-                    // (2) 일반 법정동 주소 (defaultAddress)
-                    if ("admcode".equals(name) || "addr".equals(name)) {
-                        JsonNode region = node.path("region");
-                        String area1 = region.path("area1").path("name").asText("");
-                        String area2 = region.path("area2").path("name").asText("");
-                        String area3 = region.path("area3").path("name").asText("");
-                        //String area4 = region.path("area4").path("name").asText("");
-                        defaultAddress = String.join(" ", area1, area2, area3).trim();
-                        reverseGeoCoding.add(defaultAddress);
                     }
                 }
             }
 
-            if (reverseGeoCoding.isEmpty()) {
-                reverseGeoCoding.add(
-                        roadAddress != null ? roadAddress : "도로명 정보 없음"
-                );
-                reverseGeoCoding.add(
-                        defaultAddress != null ? defaultAddress : "주소 정보 없음"
-                );
-            }
-
+            reverseGeoCoding.add(roadAddress != null ? roadAddress : "도로명 정보 없음");
+            reverseGeoCoding.add(defaultAddress != null ? defaultAddress : "주소 정보 없음");
             return reverseGeoCoding;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return List.of(
-                    roadAddress != null ? roadAddress : "도로명 정보 없음",
-                    defaultAddress != null ? defaultAddress : "주소 정보 없음"
-            );
+            return List.of("도로명 정보 없음", "주소 정보 없음");
         }
     }
 
