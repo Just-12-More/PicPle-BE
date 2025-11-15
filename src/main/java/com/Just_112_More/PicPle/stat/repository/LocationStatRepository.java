@@ -6,10 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface LocationStatRepository extends JpaRepository<LocationStat, Long> {
 
     @Query(value = "SELECT * FROM location_stat ORDER BY photo_cnt DESC LIMIT 10", nativeQuery = true)
-    public List<LocationStat> findTop10ByOrderByPhotoCntDesc();
+    List<LocationStat> findTop10ByOrderByPhotoCntDesc();
+
+    Optional<LocationStat> findByLocationLabel(String locationLabel);
 }

@@ -8,6 +8,8 @@ import com.Just_112_More.PicPle.photo.dto.*;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import com.Just_112_More.PicPle.photo.service.PhotoService;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
+import com.Just_112_More.PicPle.stat.domain.LocationStat;
+import com.Just_112_More.PicPle.stat.repository.LocationStatRepository;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 
@@ -18,7 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -33,6 +37,7 @@ public class PhotoController {
     private final PhotoService photoService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final LocationStatRepository locationStatRepository;
 
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<?>> upload(
@@ -48,8 +53,11 @@ public class PhotoController {
             User user = userRepository.findOne(userId)
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+            // 좌표로 주소 변환
             List<String> addressList = photoService.reverseGeoCoding(requestDto.getLatitude(), requestDto.getLongitude());
             //String address ="";
+
+            // 사진 저장
             Photo photo = Photo.builder()
                     .photoTitle(requestDto.getTitle())
                     .photoDesc(requestDto.getDescription())
@@ -62,7 +70,26 @@ public class PhotoController {
             photo.setUser(user);
             photoRepository.save(photo);
 
-            // ++++)))) localStat에서 검색후 있다면 찾고 증가
+            // 통계(LocationStat) 업데이트
+            // localStat에서 검색후 있다면 찾고 증가, 없다면 새로 생성
+            LocationStat locationStat = locationStatRepository
+                    .findByLocationLabel(photo.getLocationLabel())
+                    .map(stat -> {
+                        // 이미 존재하면 +1
+                        stat.setPhotoCnt(stat.getPhotoCnt() + 1);
+                        stat.setLastUpdateTime(LocalDateTime.now());
+                        return stat;
+                    })
+                    .orElseGet(() -> {
+                        // 없으면 새로 생성
+                        LocationStat newStat = new LocationStat();
+                        newStat.setLocationLabel(photo.getLocationLabel());
+                        newStat.setRoadAddress(photo.getRoadAddress());
+                        newStat.setPhotoCnt(1);
+                        newStat.setLastUpdateTime(LocalDateTime.now());
+                        return newStat;
+                    });
+            locationStatRepository.save(locationStat);
 
             uploadPhotoDto dto = uploadPhotoDto.builder()
                     .id(photo.getId())
