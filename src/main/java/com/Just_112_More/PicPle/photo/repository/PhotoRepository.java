@@ -18,11 +18,12 @@ public class PhotoRepository {
     private final EntityManager em;
 
     @Transactional
-    public void save(Photo photo) {
+    public Photo save(Photo photo) {
         if(photo.getId()==null){
             em.persist(photo);
+            return photo;
         } else {
-            em.merge(photo);
+            return em.merge(photo);
         }
     }
 

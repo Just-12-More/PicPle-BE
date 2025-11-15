@@ -3,6 +3,8 @@ package com.Just_112_More.PicPle.photo.service;
 import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.domain.PhotoChangedEvent;
+import com.Just_112_More.PicPle.photo.dto.UploadPhotoRequestDto;
 import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import com.Just_112_More.PicPle.user.domain.User;
@@ -14,6 +16,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +38,21 @@ public class PhotoService {
 
     private final PhotoRepository photoRepository;
     private final LikeRepository likeRepository;
+
+    @Transactional
+    public Photo uploadPhoto(UploadPhotoRequestDto requestDto, List<String> addressList, User user) {
+        Photo photo = Photo.builder()
+                .photoTitle(requestDto.getTitle())
+                .photoDesc(requestDto.getDescription())
+                .photoUrl(requestDto.getPhotoUrl())
+                .latitude(requestDto.getLatitude())
+                .longitude(requestDto.getLongitude())
+                .roadAddress(addressList.get(0))
+                .locationLabel(addressList.get(1))
+                .build();
+        photo.setUser(user);
+        return photoRepository.save(photo);
+    }
 
     public List<String> reverseGeoCoding(Double lat, Double lon) {
         List<String> reverseGeoCoding = new ArrayList<>();

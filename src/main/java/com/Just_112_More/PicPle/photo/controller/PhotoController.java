@@ -10,6 +10,8 @@ import com.Just_112_More.PicPle.photo.service.PhotoService;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
 import com.Just_112_More.PicPle.stat.domain.LocationStat;
 import com.Just_112_More.PicPle.stat.repository.LocationStatRepository;
+import com.Just_112_More.PicPle.stat.service.HotPlaceService;
+import com.Just_112_More.PicPle.stat.service.LocationStatService;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 
@@ -22,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,14 +36,15 @@ public class PhotoController {
 
     private final PhotoRepository photoRepository;
     private final PhotoService photoService;
+    private final LocationStatService locationStatService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
-    private final LocationStatRepository locationStatRepository;
+    private final HotPlaceService hotPlaceService;
 
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<?>> upload(
             HttpServletRequest request,
-            @RequestBody uploadPhotoRequestDto requestDto
+            @RequestBody UploadPhotoRequestDto requestDto
     ) {
         try {
             String token = jwtUtil.resolveToken(request);
@@ -55,41 +57,14 @@ public class PhotoController {
 
             // 좌표로 주소 변환
             List<String> addressList = photoService.reverseGeoCoding(requestDto.getLatitude(), requestDto.getLongitude());
-            //String address ="";
 
             // 사진 저장
-            Photo photo = Photo.builder()
-                    .photoTitle(requestDto.getTitle())
-                    .photoDesc(requestDto.getDescription())
-                    .photoUrl(requestDto.getPhotoUrl())
-                    .latitude(requestDto.getLatitude())
-                    .longitude(requestDto.getLongitude())
-                    .roadAddress(addressList.get(0))
-                    .locationLabel(addressList.get(1))
-                    .build();
-            photo.setUser(user);
-            photoRepository.save(photo);
+            Photo photo = photoService.uploadPhoto(requestDto, addressList, user);
 
             // 통계(LocationStat) 업데이트
             // localStat에서 검색후 있다면 찾고 증가, 없다면 새로 생성
-            LocationStat locationStat = locationStatRepository
-                    .findByLocationLabel(photo.getLocationLabel())
-                    .map(stat -> {
-                        // 이미 존재하면 +1
-                        stat.setPhotoCnt(stat.getPhotoCnt() + 1);
-                        stat.setLastUpdateTime(LocalDateTime.now());
-                        return stat;
-                    })
-                    .orElseGet(() -> {
-                        // 없으면 새로 생성
-                        LocationStat newStat = new LocationStat();
-                        newStat.setLocationLabel(photo.getLocationLabel());
-                        newStat.setRoadAddress(photo.getRoadAddress());
-                        newStat.setPhotoCnt(1);
-                        newStat.setLastUpdateTime(LocalDateTime.now());
-                        return newStat;
-                    });
-            locationStatRepository.save(locationStat);
+            LocationStat locationStat
+                    = locationStatService.uploadStat(photo.getLocationLabel(), photo.getRoadAddress());
 
             uploadPhotoDto dto = uploadPhotoDto.builder()
                     .id(photo.getId())
@@ -142,7 +117,7 @@ public class PhotoController {
                 .build())
                 .toList();
 
-        photosResponseDto responseDto = photosResponseDto.builder()
+        PhotosResponseDto responseDto = PhotosResponseDto.builder()
                 .photos(dtoList)
                 .build();
 
