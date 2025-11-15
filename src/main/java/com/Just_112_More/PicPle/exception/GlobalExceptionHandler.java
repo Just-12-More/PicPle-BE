@@ -13,10 +13,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ApiResponse<?>> handleCustomException(CustomException customException){
+        ApiResponse<?> response = ApiResponse.fail(
+                null,
+                customException.getErrorCode().name(),
+                customException.getErrorCode().getMessage()
+        );
+        
         return ResponseEntity
                 .status(customException.getErrorCode().getStatus())
-                .body(ApiResponse.fail(null, customException.getErrorCode().name(),
-                        customException.getErrorCode().getMessage() ));
+                .body(response);
     }
 
     @ExceptionHandler(Exception.class)

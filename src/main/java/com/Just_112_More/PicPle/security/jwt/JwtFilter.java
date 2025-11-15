@@ -32,8 +32,16 @@ public class JwtFilter extends GenericFilterBean {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-        try {
 
+        String uri = httpServletRequest.getRequestURI();
+
+        // WebSocket handshake나 메시징 관련 요청은 JWT 검증 제외
+        if (uri.startsWith("/ws-connect") || uri.startsWith("/topic") || uri.startsWith("/app")) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
+
+        try {
             String jwt = jwtUtil.resolveToken(httpServletRequest);
             String requestURI = httpServletRequest.getRequestURI();
             if (StringUtils.hasText(jwt) && jwtUtil.validateAccessToken(jwt)) {
