@@ -1,6 +1,7 @@
 package com.Just_112_More.PicPle.stat.service;
 
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.domain.PhotoChangedEvent;
 import com.Just_112_More.PicPle.photo.dto.PhotosResponseDto;
 import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.service.PhotoService;
@@ -12,8 +13,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +32,34 @@ public class LocationStatService {
 
     private final LocationStatRepository locationStatRepository;
     private final PhotoService photoService;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    @Transactional
+    public LocationStat uploadStat(String locationLabel, String roadAddress) {
+        LocationStat locationStat = locationStatRepository
+                .findByLocationLabel(locationLabel)
+                .map(stat -> {
+                    // 이미 존재하면 +1
+                    stat.setPhotoCnt(stat.getPhotoCnt() + 1);
+                    stat.setLastUpdateTime(LocalDateTime.now());
+                    return stat;
+                })
+                .orElseGet(() -> {
+                    // 없으면 새로 생성
+                    LocationStat newStat = new LocationStat();
+                    newStat.setLocationLabel(locationLabel);
+                    newStat.setRoadAddress(roadAddress);
+                    newStat.setPhotoCnt(1);
+                    newStat.setLastUpdateTime(LocalDateTime.now());
+                    return newStat;
+                });
+        LocationStat savedLocalStat = locationStatRepository.save(locationStat);
+
+        // 트랜잭션 커밋후 실행될 이벤트 등록
+        applicationEventPublisher.publishEvent(new PhotoChangedEvent(locationLabel));
+
+        return savedLocalStat;
+    }
 
     public HotPlaceResponseList calculateTop10FromDB() {
 

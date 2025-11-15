@@ -5,6 +5,7 @@ import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.stat.dto.HotPlaceResponseList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -13,11 +14,12 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class HotPlaceService {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final SimpMessagingTemplate simpleMessagingTemplate;
     private final LocationStatService locationStatService;
     private static final String TOP10_KEY = "top10::hotplaces";
 
@@ -40,5 +42,14 @@ public class HotPlaceService {
         }
     }
 
+    public void checkListAndBroadcast(){
+        HotPlaceResponseList oldList = getTop10Cache();
+        HotPlaceResponseList newList = locationStatService.calculateTop10FromDB();
 
+        if (!Objects.equals(oldList, newList)) {
+            saveTop10Cache(newList); // 새로운 내용으로 갱신하여 저장
+            simpleMessagingTemplate.convertAndSend("/topic/hot-places", newList);
+            log.info("Hotplaces TOP10 변경 감지 → Redis 갱신 및 broadcast 완료");
+        }
+    }
 }
