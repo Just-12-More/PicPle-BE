@@ -50,6 +50,7 @@ public class HotPlaceService {
             saveTop10Cache(newList); // 새로운 내용으로 갱신하여 저장
             simpleMessagingTemplate.convertAndSend("/topic/hot-places", newList);
             log.info("Hotplaces TOP10 변경 감지 → Redis 갱신 및 broadcast 완료");
+            log.info("변경 감지됨...old={}, new={}", oldList, newList);
         }
     }
 }
