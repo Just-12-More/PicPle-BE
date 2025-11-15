@@ -1,6 +1,7 @@
 package com.Just_112_More.PicPle.stat.service;
 
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.dto.PhotosResponseDto;
 import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.service.PhotoService;
 import com.Just_112_More.PicPle.stat.domain.LocationStat;
@@ -50,35 +51,13 @@ public class LocationStatService {
             String latitude = geoData.get(0);  // 위도
             String longitude = geoData.get(1);  // 경도
 
-            // 사진 리스트 가져오기
-            List<Photo> photos = photoService.getPhotosByLocation(locationStat.getLocationLabel());
-            log.info("연결된 사진: {}개", photos.size());
-
-            List<uploadPhotoDto> photoList = photos.stream()
-                    .map( photo -> uploadPhotoDto.builder()
-                            .id(photo.getId())
-                            .title(photo.getPhotoTitle())
-                            .imgUrl(s3Url + photo.getPhotoUrl())
-                            .description(photo.getPhotoDesc())
-                            .nickname(photo.getUser().getUserName())
-                            .profileImgUrl(photo.getUser().getProfilePath())
-                            .likeCount(photo.getLikeCount())
-                            .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
-                            .address(photo.getLocationLabel())
-                            .createdAt(photo.getPhotoCreate().toString())
-                            .build()
-                    )
-                    .collect(Collectors.toList());
-
             HotPlaceResponse hotPlaceResponse = HotPlaceResponse.builder()
                     .order(i + 1)
                     .locationLabel(locationStat.getLocationLabel())
                     .photoCnt(locationStat.getPhotoCnt())
                     .latitude(latitude)
                     .longitude(longitude)
-                    .photos(photoList)
                     .build();
-
             results.add(hotPlaceResponse);
 
         }
@@ -90,4 +69,27 @@ public class LocationStatService {
 
     }
 
+    public PhotosResponseDto getLocationPhotos(String location) {
+        // 사진 리스트 가져오기
+        List<Photo> photos = photoService.getPhotosByLocation(location);
+        log.info("연결된 사진: {}개", photos.size());
+
+        List<uploadPhotoDto> photoList = photos.stream()
+                .map( photo -> uploadPhotoDto.builder()
+                        .id(photo.getId())
+                        .title(photo.getPhotoTitle())
+                        .imgUrl(s3Url + photo.getPhotoUrl())
+                        .description(photo.getPhotoDesc())
+                        .nickname(photo.getUser().getUserName())
+                        .profileImgUrl(photo.getUser().getProfilePath())
+                        .likeCount(photo.getLikeCount())
+                        .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
+                        .address(photo.getLocationLabel())
+                        .createdAt(photo.getPhotoCreate().toString())
+                        .build()
+                )
+                .collect(Collectors.toList());
+
+        return new PhotosResponseDto(photoList);
+    }
 }

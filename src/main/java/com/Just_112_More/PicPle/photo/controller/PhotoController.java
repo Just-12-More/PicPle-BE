@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -142,7 +141,7 @@ public class PhotoController {
                 .build())
                 .toList();
 
-        photosResponseDto responseDto = photosResponseDto.builder()
+        PhotosResponseDto responseDto = PhotosResponseDto.builder()
                 .photos(dtoList)
                 .build();
 
