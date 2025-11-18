@@ -3,9 +3,7 @@ package com.Just_112_More.PicPle.photo.service;
 import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
-import com.Just_112_More.PicPle.photo.domain.PhotoChangedEvent;
 import com.Just_112_More.PicPle.photo.dto.UploadPhotoRequestDto;
-import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,7 +14,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
