@@ -57,6 +57,11 @@ public class Photo {
         this.user = user;
     }
 
+    public void updateAddress(String locationLabel, String roadAddress ) {
+        this.locationLabel = locationLabel;
+        this.roadAddress = roadAddress;
+    }
+
     @PrePersist
     public void prePersist() {
         if (this.photoCreate == null) {

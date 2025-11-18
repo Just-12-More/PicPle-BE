@@ -37,15 +37,15 @@ public class PhotoService {
     private final LikeRepository likeRepository;
 
     @Transactional
-    public Photo uploadPhoto(UploadPhotoRequestDto requestDto, List<String> addressList, User user) {
+    public Photo uploadPhoto(UploadPhotoRequestDto requestDto, User user) {
         Photo photo = Photo.builder()
                 .photoTitle(requestDto.getTitle())
                 .photoDesc(requestDto.getDescription())
                 .photoUrl(requestDto.getPhotoUrl())
-                .latitude(requestDto.getLatitude())
-                .longitude(requestDto.getLongitude())
-                .roadAddress(addressList.get(0))
-                .locationLabel(addressList.get(1))
+                //.latitude(requestDto.getLatitude())
+                //.longitude(requestDto.getLongitude())
+                //.roadAddress(addressList.get(0))
+                //.locationLabel(addressList.get(1))
                 .build();
         photo.setUser(user);
         return photoRepository.save(photo);
