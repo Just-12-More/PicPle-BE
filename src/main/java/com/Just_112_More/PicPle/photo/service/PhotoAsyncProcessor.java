@@ -26,7 +26,6 @@ public class PhotoAsyncProcessor {
     private final LocationStatService locationStatService;
 
     @Async("photoWorkerExecutor")
-    @Transactional
     public void processPhotoAsync(Long photoId, double lat, double lon) {
         try {
             // 1) 리버스 지오코딩 - locationlabel, roadaddress추출
@@ -35,11 +34,7 @@ public class PhotoAsyncProcessor {
             String locationLabel = addressList.get(1);
 
             // 2) photo 업데이트
-            Photo photo = photoRepository.getPhotoById(photoId);
-            if (photo == null) throw new CustomException(ErrorCode.PHOTO_NOT_FOUND);
-
-            photo.updateAddress(locationLabel, roadAddress);
-            photoRepository.save(photo);
+            photoService.updatePhotoAddress(photoId, roadAddress, locationLabel);
 
             // 3) LocationStat 업데이트
             locationStatService.uploadStat(locationLabel, roadAddress);

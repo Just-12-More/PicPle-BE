@@ -1,5 +1,7 @@
 package com.Just_112_More.PicPle.photo.service;
 
+import com.Just_112_More.PicPle.exception.CustomException;
+import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
@@ -206,5 +208,12 @@ public class PhotoService {
 
     public List<Photo> getPhotosByLocation(String locationLabel) {
         return photoRepository.findByLocationLabel(locationLabel);
+    }
+
+    @Transactional
+    public void updatePhotoAddress(Long photoId, String locationLabel, String roadAddress){
+        Photo photo = photoRepository.getPhotoById(photoId);
+        if (photo == null) throw new CustomException(ErrorCode.PHOTO_NOT_FOUND);
+        photo.updateAddress(locationLabel, roadAddress);
     }
 }

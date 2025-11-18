@@ -34,7 +34,6 @@ public class LocationStatService {
     private final PhotoService photoService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    @Transactional
     public void uploadStat(String locationLabel, String roadAddress) {
         locationStatRepository.upsertStat(locationLabel, roadAddress);
 
