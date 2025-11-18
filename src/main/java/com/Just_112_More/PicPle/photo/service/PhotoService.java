@@ -44,8 +44,8 @@ public class PhotoService {
                 .photoTitle(requestDto.getTitle())
                 .photoDesc(requestDto.getDescription())
                 .photoUrl(requestDto.getPhotoUrl())
-                //.latitude(requestDto.getLatitude())
-                //.longitude(requestDto.getLongitude())
+                .latitude(requestDto.getLatitude())
+                .longitude(requestDto.getLongitude())
                 //.roadAddress(addressList.get(0))
                 //.locationLabel(addressList.get(1))
                 .build();
