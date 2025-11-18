@@ -35,30 +35,11 @@ public class LocationStatService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public LocationStat uploadStat(String locationLabel, String roadAddress) {
-        LocationStat locationStat = locationStatRepository
-                .findByLocationLabel(locationLabel)
-                .map(stat -> {
-                    // 이미 존재하면 +1
-                    stat.setPhotoCnt(stat.getPhotoCnt() + 1);
-                    stat.setLastUpdateTime(LocalDateTime.now());
-                    return stat;
-                })
-                .orElseGet(() -> {
-                    // 없으면 새로 생성
-                    LocationStat newStat = new LocationStat();
-                    newStat.setLocationLabel(locationLabel);
-                    newStat.setRoadAddress(roadAddress);
-                    newStat.setPhotoCnt(1);
-                    newStat.setLastUpdateTime(LocalDateTime.now());
-                    return newStat;
-                });
-        LocationStat savedLocalStat = locationStatRepository.save(locationStat);
+    public void uploadStat(String locationLabel, String roadAddress) {
+        locationStatRepository.upsertStat(locationLabel, roadAddress);
 
         // 트랜잭션 커밋후 실행될 이벤트 등록
         applicationEventPublisher.publishEvent(new PhotoChangedEvent(locationLabel));
-
-        return savedLocalStat;
     }
 
     public HotPlaceResponseList calculateTop10FromDB() {
