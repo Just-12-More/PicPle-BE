@@ -31,6 +31,7 @@ public class Photo {
     private Double latitude;
     private Double longitude;
     private String locationLabel;
+    private String roadAddress;
 
     private int likeCount = 0;
     private LocalDateTime photoCreate;
@@ -47,13 +48,14 @@ public class Photo {
 
     @Builder
     public Photo(String photoTitle, String photoDesc, String photoUrl,
-                 Double latitude, Double longitude, String locationLabel) {
+                 Double latitude, Double longitude, String locationLabel, String roadAddress) {
         this.photoTitle = photoTitle;
         this.photoDesc = photoDesc;
         this.photoUrl = photoUrl;
         this.latitude = latitude;
         this.longitude = longitude;
         this.locationLabel = locationLabel;
+        this.roadAddress = roadAddress;
     }
 
     public void setUser(User user) {

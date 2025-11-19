@@ -9,7 +9,7 @@ import java.util.List;
 @Setter
 @Getter
 @NoArgsConstructor
-public class uploadPhotoRequestDto {
+public class UploadPhotoRequestDto {
     private String title;
     private String description;
     private String photoUrl;

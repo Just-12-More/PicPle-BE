@@ -18,11 +18,12 @@ public class PhotoRepository {
     private final EntityManager em;
 
     @Transactional
-    public void save(Photo photo) {
+    public Photo save(Photo photo) {
         if(photo.getId()==null){
             em.persist(photo);
+            return photo;
         } else {
-            em.merge(photo);
+            return em.merge(photo);
         }
     }
 
@@ -96,6 +97,12 @@ public class PhotoRepository {
         if (photo != null) {
             em.remove(photo);
         }
+    }
+
+    public List<Photo> findByLocationLabel(String locationLabel) {
+        String sql = "SELECT p FROM Photo p WHERE p.locationLabel = :locationLabel";
+        return em.createQuery(sql, Photo.class)
+                .setParameter("locationLabel", locationLabel).getResultList();
     }
 
     public List<Photo> findByTagIdsIn(List<Long> tagIds) {
