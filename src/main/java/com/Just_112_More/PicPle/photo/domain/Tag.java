@@ -14,7 +14,7 @@ import lombok.ToString;
         uniqueConstraints = {
             @UniqueConstraint(
                     name= "UK_tag_name_type",
-                    columnNames = {"name", "type"}
+                    columnNames = {"name", "tag_type"}
             )
         },
         indexes = {
