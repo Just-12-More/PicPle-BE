@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -13,4 +15,5 @@ public class UploadPhotoRequestDto {
     private String photoUrl;
     private Double latitude;
     private Double longitude;
+    private List<Long> tagIds;
 }

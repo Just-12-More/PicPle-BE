@@ -6,7 +6,14 @@ import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.photo.dto.UploadPhotoRequestDto;
+import com.Just_112_More.PicPle.photo.domain.PhotoChangedEvent;
+import com.Just_112_More.PicPle.photo.domain.Tag;
+import com.Just_112_More.PicPle.photo.dto.UploadPhotoRequestDto;
+import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
+import com.Just_112_More.PicPle.photo.dto.PhotoDto;
+import com.Just_112_More.PicPle.photo.dto.RecommendRequest;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
+import com.Just_112_More.PicPle.photo.repository.TagRepository;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +32,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +46,7 @@ public class PhotoService {
 
     private final PhotoRepository photoRepository;
     private final LikeRepository likeRepository;
+    private final TagRepository tagRepository;
 
     @Transactional
     public Photo uploadPhoto(UploadPhotoRequestDto requestDto, User user) {
@@ -216,5 +226,28 @@ public class PhotoService {
         Photo photo = photoRepository.getPhotoById(photoId);
         if (photo == null) throw new CustomException(ErrorCode.PHOTO_NOT_FOUND);
         photo.updateAddress(locationLabel, roadAddress);
+    }
+  
+    public List<PhotoDto> recommendPhotos(RecommendRequest request) {
+        List<Long> tagIds = request.getTagIds();
+
+        if (tagIds==null || tagIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<Photo> photos = photoRepository.findByTagIdsIn(tagIds);
+        Collections.shuffle(photos);
+
+        // 상위 N개
+        return photos.stream()
+                .limit(5)
+                .map(PhotoDto::new)
+                .collect(Collectors.toList());
+    }
+
+    public void addTags(Photo photo, List<Long> tagIds) {
+        if(tagIds==null || tagIds.isEmpty()) return;
+        List<Tag> tags = tagRepository.findByIds(tagIds);
+        photo.addTags(tags);
     }
 }
