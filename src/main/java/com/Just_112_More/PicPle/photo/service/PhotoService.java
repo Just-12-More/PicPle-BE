@@ -3,6 +3,8 @@ package com.Just_112_More.PicPle.photo.service;
 import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.dto.PhotoDto;
+import com.Just_112_More.PicPle.photo.dto.RecommendRequest;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,6 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -94,5 +100,29 @@ public class PhotoService {
 
         photo.addLike(like);
         photoRepository.save(photo);
+    }
+
+    public List<PhotoDto> recommendPhotos(RecommendRequest request) {
+        // 1. 형용사 태그와 명사 태그 ID를 하나의 리스트로 합침
+        List<Long> allTagIds = new ArrayList<>();
+        if (request.getAdjectiveTagIds() != null) allTagIds.addAll(request.getAdjectiveTagIds());
+        if (request.getNounTagIds() != null) allTagIds.addAll(request.getNounTagIds());
+
+        // 태그 선택이 없으면 빈 리스트 반환 (혹은 전체 랜덤 반환)
+        if (allTagIds.isEmpty()) {
+            return List.of();
+        }
+
+        // 2. 해당 태그를 가진 사진들을 DB에서 조회
+        List<Photo> photos = photoRepository.findByTagIdsIn(allTagIds);
+
+        // 3. [랜덤 알고리즘] 리스트를 섞음 (Shuffle)
+        Collections.shuffle(photos);
+
+        // 4. 상위 N개
+        return photos.stream()
+                .limit(5)
+                .map(PhotoDto::new)
+                .collect(Collectors.toList());
     }
 }

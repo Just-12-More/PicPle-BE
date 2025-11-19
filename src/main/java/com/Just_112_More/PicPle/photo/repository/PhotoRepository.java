@@ -98,4 +98,18 @@ public class PhotoRepository {
         }
     }
 
+    public List<Photo> findByTagIdsIn(List<Long> tagIds) {
+        if(tagIds==null || tagIds.isEmpty()){
+            return List.of();
+        }
+
+        return em.createQuery(
+                "select distinct p " +
+                        "from Photo p " +
+                        "join p.photoTags pt " +
+                        "join pt.tag t " +
+                        "where t.id in :tagIds", Photo.class)
+                .setParameter("tagIds", tagIds)
+                .getResultList();
+    }
 }

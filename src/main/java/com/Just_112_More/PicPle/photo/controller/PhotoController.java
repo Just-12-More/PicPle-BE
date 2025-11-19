@@ -229,4 +229,13 @@ public class PhotoController {
         TagResponse tagResponse = new TagResponse(partitionedTags.get(true), partitionedTags.get(false));
         return ResponseEntity.ok(ApiResponse.success(tagResponse));
     }
+
+    @GetMapping("/recommend")
+    public ResponseEntity<ApiResponse<?>> getRecommendedPhotos(
+            @RequestBody RecommendRequest request
+    ) {
+        List<PhotoDto> photos = photoService.recommendPhotos(request);
+        RecommendResponse response = new RecommendResponse(photos);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 }
