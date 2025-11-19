@@ -47,7 +47,7 @@ public class PhotoController {
     private final LocationStatService locationStatService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
-    private final HotPlaceService hotPlaceService;
+    private final PhotoAsyncProcessor photoAsyncProcessor;
 
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<?>> upload(
@@ -55,6 +55,8 @@ public class PhotoController {
             @RequestBody UploadPhotoRequestDto requestDto
     ) {
         try {
+
+            // (0) jwt 검증
             String token = jwtUtil.resolveToken(request);
             if (token == null) throw new CustomException(ErrorCode.ACCESS_TOKEN_MISSING);
             jwtUtil.validateAccessToken(token);
@@ -63,20 +65,35 @@ public class PhotoController {
             User user = userRepository.findOne(userId)
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-            // 좌표로 주소 변환
-            List<String> addressList = photoService.reverseGeoCoding(requestDto.getLatitude(), requestDto.getLongitude());
+            /*
+             좌표로 주소 변환
+            List<String> ad adressList = photoService.reverseGeoCoding(requestDto.getLatitude(), requestDto.getLongitude());
+            */
 
-            // 사진 저장
-            Photo photo = photoService.uploadPhoto(requestDto, addressList, user);
-
+            // (1) 사진 저장 : 최소정보만 insert
+            // Photo photo = photoService.uploadPhoto(requestDto, addressList, user);
+            Photo photo = photoService.uploadPhoto(requestDto, user);
+          
             // 사진에 태그 추가
             photoService.addTags(photo, requestDto.getTagIds());
 
+            /*
+             통계(LocationStat) 업데이트
             // 통계(LocationStat) 업데이트
             // localStat에서 검색후 있다면 찾고 증가, 없다면 새로 생성
             LocationStat locationStat
-                    = locationStatService.uploadStat(photo.getLocationLabel(), photo.getRoadAddress());
+                 = locationStatService.uploadStat(photo.getLocationLabel(), photo.getRoadAddress());
+            */
 
+            // (2) 비동기 worker에 처리 요청
+            photoAsyncProcessor.processPhotoAsync(
+                    photo.getId(),
+                    requestDto.getLatitude(),
+                    requestDto.getLongitude(),
+                    requestDto.getPhotoUrl()
+            );
+
+            // (3) 업로드 완료 응답 즉시 반환
             uploadPhotoDto dto = uploadPhotoDto.builder()
                     .id(photo.getId())
                     .title(photo.getPhotoTitle())
@@ -86,7 +103,7 @@ public class PhotoController {
                     .profileImgUrl(user.getProfilePath())
                     .likeCount(photo.getLikeCount())
                     .isLiked(false)
-                    .address(photo.getLocationLabel())
+                    //.address(photo.getLocationLabel())
                     .createdAt(photo.getPhotoCreate().toString())
                     .longitude(photo.getLongitude())
                     .latitude(photo.getLatitude())

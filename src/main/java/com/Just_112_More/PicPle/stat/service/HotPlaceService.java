@@ -46,7 +46,7 @@ public class HotPlaceService {
         HotPlaceResponseList oldList = getTop10Cache();
         HotPlaceResponseList newList = locationStatService.calculateTop10FromDB();
 
-        if (!Objects.equals(oldList, newList)) {
+        if (!Objects.equals(oldList, newList)) { // 비교작업
             saveTop10Cache(newList); // 새로운 내용으로 갱신하여 저장
             simpleMessagingTemplate.convertAndSend("/topic/hot-places", newList);
             log.info("Hotplaces TOP10 변경 감지 → Redis 갱신 및 broadcast 완료");

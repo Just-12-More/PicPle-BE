@@ -1,8 +1,11 @@
 package com.Just_112_More.PicPle.photo.service;
 
+import com.Just_112_More.PicPle.exception.CustomException;
+import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.like.domain.Like;
 import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.dto.UploadPhotoRequestDto;
 import com.Just_112_More.PicPle.photo.domain.PhotoChangedEvent;
 import com.Just_112_More.PicPle.photo.domain.Tag;
 import com.Just_112_More.PicPle.photo.dto.UploadPhotoRequestDto;
@@ -20,7 +23,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,15 +49,16 @@ public class PhotoService {
     private final TagRepository tagRepository;
 
     @Transactional
-    public Photo uploadPhoto(UploadPhotoRequestDto requestDto, List<String> addressList, User user) {
+    public Photo uploadPhoto(UploadPhotoRequestDto requestDto, User user) {
         Photo photo = Photo.builder()
                 .photoTitle(requestDto.getTitle())
                 .photoDesc(requestDto.getDescription())
                 .photoUrl(requestDto.getPhotoUrl())
                 .latitude(requestDto.getLatitude())
                 .longitude(requestDto.getLongitude())
-                .roadAddress(addressList.get(0))
-                .locationLabel(addressList.get(1))
+
+                //.roadAddress(addressList.get(0))
+                //.locationLabel(addressList.get(1))
                 .build();
         photo.setUser(user);
         return photoRepository.save(photo);
@@ -218,6 +221,13 @@ public class PhotoService {
         return photoRepository.findByLocationLabel(locationLabel);
     }
 
+    @Transactional
+    public void updatePhotoAddress(Long photoId, String locationLabel, String roadAddress){
+        Photo photo = photoRepository.getPhotoById(photoId);
+        if (photo == null) throw new CustomException(ErrorCode.PHOTO_NOT_FOUND);
+        photo.updateAddress(locationLabel, roadAddress);
+    }
+  
     public List<PhotoDto> recommendPhotos(RecommendRequest request) {
         List<Long> tagIds = request.getTagIds();
 
