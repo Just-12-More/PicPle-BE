@@ -245,6 +245,7 @@ public class PhotoService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void addTags(Photo photo, List<Long> tagIds) {
         if(tagIds==null || tagIds.isEmpty()) return;
         List<Tag> tags = tagRepository.findByIds(tagIds);
