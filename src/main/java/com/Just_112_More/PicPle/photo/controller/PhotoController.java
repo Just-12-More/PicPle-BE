@@ -9,6 +9,7 @@ import com.Just_112_More.PicPle.photo.domain.TagType;
 import com.Just_112_More.PicPle.photo.dto.*;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import com.Just_112_More.PicPle.photo.repository.TagRepository;
+import com.Just_112_More.PicPle.photo.service.PhotoAsyncProcessor;
 import com.Just_112_More.PicPle.photo.service.PhotoService;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
 import com.Just_112_More.PicPle.stat.domain.LocationStat;
