@@ -69,6 +69,9 @@ public class PhotoController {
             // 사진 저장
             Photo photo = photoService.uploadPhoto(requestDto, addressList, user);
 
+            // 사진에 태그 추가
+            photoService.addTags(photo, requestDto.getTagIds());
+
             // 통계(LocationStat) 업데이트
             // localStat에서 검색후 있다면 찾고 증가, 없다면 새로 생성
             LocationStat locationStat
