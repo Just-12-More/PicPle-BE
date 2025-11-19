@@ -71,6 +71,7 @@ public class LocationStatService {
                     .photoCnt(locationStat.getPhotoCnt())
                     .latitude(latitude)
                     .longitude(longitude)
+                    .imgUrl(locationStat.getRepresentativePhotoUrl())
                     .build();
             results.add(hotPlaceResponse);
 

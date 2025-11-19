@@ -17,4 +17,5 @@ public class HotPlaceResponse {
     private int photoCnt;
     private String latitude;
     private String longitude;
+    private String imgUrl;
 }
