@@ -76,9 +76,12 @@ public class PhotoController {
             */
 
             // (2) 비동기 worker에 처리 요청
-            photoAsyncProcessor.processPhotoAsync(photo.getId(),
+            photoAsyncProcessor.processPhotoAsync(
+                    photo.getId(),
                     requestDto.getLatitude(),
-                    requestDto.getLongitude());
+                    requestDto.getLongitude(),
+                    requestDto.getPhotoUrl()
+            );
 
             // (3) 업로드 완료 응답 즉시 반환
             uploadPhotoDto dto = uploadPhotoDto.builder()

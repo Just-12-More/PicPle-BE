@@ -26,7 +26,7 @@ public class PhotoAsyncProcessor {
     private final LocationStatService locationStatService;
 
     @Async("photoWorkerExecutor")
-    public void processPhotoAsync(Long photoId, double lat, double lon) {
+    public void processPhotoAsync(Long photoId, double lat, double lon, String photoUrl) {
         try {
             // 1) 리버스 지오코딩 - locationlabel, roadaddress추출
             List<String> addressList = photoService.reverseGeoCoding(lat, lon);
@@ -37,7 +37,7 @@ public class PhotoAsyncProcessor {
             photoService.updatePhotoAddress(photoId, roadAddress, locationLabel);
 
             // 3) LocationStat 업데이트
-            locationStatService.uploadStat(locationLabel, roadAddress);
+            locationStatService.uploadStat(locationLabel, roadAddress, photoUrl);
         } catch (Exception e) {
             log.error("Async photo processing failed. photoId=" + photoId, e);
         }

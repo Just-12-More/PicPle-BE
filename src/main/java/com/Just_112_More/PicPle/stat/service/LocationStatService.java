@@ -35,8 +35,8 @@ public class LocationStatService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public void uploadStat(String locationLabel, String roadAddress) {
-        locationStatRepository.upsertStat(locationLabel, roadAddress);
+    public void uploadStat(String locationLabel, String roadAddress, String photoUrl) {
+        locationStatRepository.upsertStat(locationLabel, roadAddress, photoUrl);
 
         // 트랜잭션 커밋후 실행될 이벤트 등록
         applicationEventPublisher.publishEvent(new PhotoChangedEvent(locationLabel));
