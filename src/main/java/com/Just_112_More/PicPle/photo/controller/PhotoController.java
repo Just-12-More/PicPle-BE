@@ -238,7 +238,6 @@ public class PhotoController {
             @RequestBody RecommendRequest request
     ) {
         List<PhotoDto> photos = photoService.recommendPhotos(request);
-        RecommendResponse response = new RecommendResponse(photos);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(photos));
     }
 }

@@ -216,23 +216,16 @@ public class PhotoService {
     }
 
     public List<PhotoDto> recommendPhotos(RecommendRequest request) {
-        // 1. 형용사 태그와 명사 태그 ID를 하나의 리스트로 합침
-        List<Long> allTagIds = new ArrayList<>();
-        if (request.getAdjectiveTagIds() != null) allTagIds.addAll(request.getAdjectiveTagIds());
-        if (request.getNounTagIds() != null) allTagIds.addAll(request.getNounTagIds());
+        List<Long> tagIds = request.getTagIds();
 
-        // 태그 선택이 없으면 빈 리스트 반환 (혹은 전체 랜덤 반환)
-        if (allTagIds.isEmpty()) {
+        if (tagIds.isEmpty()) {
             return List.of();
         }
 
-        // 2. 해당 태그를 가진 사진들을 DB에서 조회
-        List<Photo> photos = photoRepository.findByTagIdsIn(allTagIds);
-
-        // 3. [랜덤 알고리즘] 리스트를 섞음 (Shuffle)
+        List<Photo> photos = photoRepository.findByTagIdsIn(tagIds);
         Collections.shuffle(photos);
 
-        // 4. 상위 N개
+        // 상위 N개
         return photos.stream()
                 .limit(5)
                 .map(PhotoDto::new)

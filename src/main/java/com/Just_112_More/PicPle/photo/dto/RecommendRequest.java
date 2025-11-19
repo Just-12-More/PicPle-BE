@@ -6,6 +6,5 @@ import java.util.List;
 
 @Getter
 public class RecommendRequest {
-    private List<Long> adjectiveTagIds;
-    private List<Long> nounTagIds;
+    private List<Long> tagIds;
 }
