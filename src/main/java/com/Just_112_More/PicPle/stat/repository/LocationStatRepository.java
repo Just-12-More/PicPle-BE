@@ -20,7 +20,6 @@ public interface LocationStatRepository extends JpaRepository<LocationStat, Long
     Optional<LocationStat> findByLocationLabel(String locationLabel);
 
     @Modifying(clearAutomatically = true)
-    @Transactional
     @Query(value = """
         INSERT INTO location_stat (location_label, road_address, photo_cnt, last_update_time)
         VALUES (:locationLabel, :roadAddress, 1, NOW())
