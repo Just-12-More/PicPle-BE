@@ -232,7 +232,7 @@ public class PhotoController {
         Map<Boolean, List<TagDto>> partitionedTags = tags.stream()
                 .map(TagDto::new)
                 .collect(Collectors.partitioningBy(tagDto -> tagDto.getTagType().equals(TagType.NOUN.name())));
-        TagResponse tagResponse = new TagResponse(partitionedTags.get(true), partitionedTags.get(false));
+        TagResponse tagResponse = new TagResponse(partitionedTags.get(false), partitionedTags.get(true));
         return ResponseEntity.ok(ApiResponse.success(tagResponse));
     }
 

@@ -221,7 +221,7 @@ public class PhotoService {
     public List<PhotoDto> recommendPhotos(RecommendRequest request) {
         List<Long> tagIds = request.getTagIds();
 
-        if (tagIds.isEmpty()) {
+        if (tagIds==null || tagIds.isEmpty()) {
             return List.of();
         }
 
