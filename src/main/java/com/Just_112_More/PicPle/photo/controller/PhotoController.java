@@ -4,8 +4,11 @@ import com.Just_112_More.PicPle.common.ApiResponse;
 import com.Just_112_More.PicPle.exception.CustomException;
 import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.domain.Tag;
+import com.Just_112_More.PicPle.photo.domain.TagType;
 import com.Just_112_More.PicPle.photo.dto.*;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
+import com.Just_112_More.PicPle.photo.repository.TagRepository;
 import com.Just_112_More.PicPle.photo.service.PhotoService;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
 import com.Just_112_More.PicPle.stat.domain.LocationStat;
@@ -15,7 +18,9 @@ import com.Just_112_More.PicPle.stat.service.LocationStatService;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 
+import com.Just_112_More.PicPle.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -24,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -31,6 +37,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/v1/photos")
 public class PhotoController {
 
+    private final UserService userService;
+    private final TagRepository tagRepository;
     @Value("${urls.s3}")
     private String s3Url;
 
@@ -60,6 +68,9 @@ public class PhotoController {
 
             // 사진 저장
             Photo photo = photoService.uploadPhoto(requestDto, addressList, user);
+
+            // 사진에 태그 추가
+            photoService.addTags(photo, requestDto.getTagIds());
 
             // 통계(LocationStat) 업데이트
             // localStat에서 검색후 있다면 찾고 증가, 없다면 새로 생성
@@ -211,5 +222,25 @@ public class PhotoController {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.fail(null, "INTERNAL_ERROR", "요청하신 사진이 없습니다."));
         }
+    }
+
+    @GetMapping("/tags")
+    public ResponseEntity<ApiResponse<?>> getPhotoTags(
+        HttpServletRequest request
+    ) {
+        List<Tag> tags = tagRepository.findAll();
+        Map<Boolean, List<TagDto>> partitionedTags = tags.stream()
+                .map(TagDto::new)
+                .collect(Collectors.partitioningBy(tagDto -> tagDto.getTagType().equals(TagType.NOUN.name())));
+        TagResponse tagResponse = new TagResponse(partitionedTags.get(false), partitionedTags.get(true));
+        return ResponseEntity.ok(ApiResponse.success(tagResponse));
+    }
+
+    @PostMapping("/recommend")
+    public ResponseEntity<ApiResponse<?>> getRecommendedPhotos(
+            @RequestBody RecommendRequest request
+    ) {
+        List<PhotoDto> photos = photoService.recommendPhotos(request);
+        return ResponseEntity.ok(ApiResponse.success(photos));
     }
 }

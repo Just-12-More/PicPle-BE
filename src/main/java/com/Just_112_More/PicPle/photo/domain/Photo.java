@@ -7,7 +7,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -40,6 +42,9 @@ public class Photo {
 
     @OneToMany(mappedBy = "photo", cascade = CascadeType.ALL)
     private List<Like> photoLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "photo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PhotoTag> photoTags = new HashSet<>();
 
     @Builder
     public Photo(String photoTitle, String photoDesc, String photoUrl,
@@ -76,6 +81,27 @@ public class Photo {
     public void removeLike(Like like) {
         this.photoLikes.remove(like);
         calculateLikeCount();
+    }
+
+    public void addTag(Tag tag) {
+        if (tag == null || tag.getId() == null) {
+            throw new IllegalArgumentException("Tag must be persisted.");
+        }
+
+        PhotoTag photoTag = new PhotoTag(this, tag);
+        this.photoTags.add(photoTag);
+    }
+
+    public void addTags(List<Tag> tags) {
+        if (tags == null || tags.isEmpty()) return;
+        for (Tag tag : tags) {
+            addTag(tag);
+        }
+    }
+
+    public void removeTag(Tag tag) {
+        if(tag == null || tag.getId() == null) return;
+        this.photoTags.removeIf(photoTag -> photoTag.getTag().getId().equals(tag.getId()));
     }
 
     public String getMapUrl() {
