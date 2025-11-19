@@ -236,7 +236,7 @@ public class PhotoController {
         return ResponseEntity.ok(ApiResponse.success(tagResponse));
     }
 
-    @GetMapping("/recommend")
+    @PostMapping("/recommend")
     public ResponseEntity<ApiResponse<?>> getRecommendedPhotos(
             @RequestBody RecommendRequest request
     ) {
