@@ -43,9 +43,6 @@ jobs:
             cd /home/rocky/app
 
             sudo docker-compose down
-            sudo docker rm -f spring-app || true
-            sudo docker rm -f backend || true
-            
             sudo docker-compose pull
             sudo docker-compose up -d
             sudo docker image prune -f
