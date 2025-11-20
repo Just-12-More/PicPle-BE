@@ -148,4 +148,14 @@ public class PhotoRepository {
                 .setParameter("tagId", tagId)
                 .getResultList();
     }
+
+    public List<Photo> findByIds(List<Long> photoIds) {
+        return em.createQuery(
+                "select p " +
+                        "from Photo p " +
+                        "where p.id in :photoIds " +
+                        "order by p.likeCount desc", Photo.class)
+                .setParameter("photoIds", photoIds)
+                .getResultList();
+    }
 }
