@@ -58,6 +58,7 @@ public class PhotoService {
                 //.locationLabel(addressList.get(1))
                 .build();
         photo.setUser(user);
+        this.addTags(photo, requestDto.getTagIds());
         return photoRepository.save(photo);
     }
 
