@@ -74,9 +74,6 @@ public class PhotoController {
             // (1) 사진 저장 : 최소정보만 insert
             // Photo photo = photoService.uploadPhoto(requestDto, addressList, user);
             Photo photo = photoService.uploadPhoto(requestDto, user);
-          
-            // 사진에 태그 추가
-            photoService.addTags(photo, requestDto.getTagIds());
 
             /*
              통계(LocationStat) 업데이트
@@ -259,6 +256,23 @@ public class PhotoController {
             @RequestBody RecommendRequest request
     ) {
         List<PhotoDto> photos = photoService.recommendPhotos(request);
+        return ResponseEntity.ok(ApiResponse.success(photos));
+    }
+
+    @GetMapping("/hot-tags")
+    public ResponseEntity<ApiResponse<?>> getHotTags() {
+        List<HotTagDto> hotTagDtos = photoService.getHotTags();
+        return ResponseEntity.ok(ApiResponse.success(hotTagDtos));
+    }
+
+    @GetMapping("")
+    public ResponseEntity<ApiResponse<?>> getPhotos(
+            @RequestParam("tagId") Long tagId
+    ) {
+        List<PhotoDto> photos = photoRepository.findByTagId(tagId)
+                .stream()
+                .map(PhotoDto::new)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(photos));
     }
 }
