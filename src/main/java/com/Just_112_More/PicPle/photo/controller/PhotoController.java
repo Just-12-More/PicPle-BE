@@ -267,4 +267,15 @@ public class PhotoController {
         List<HotTagDto> hotTagDtos = photoService.getHotTags();
         return ResponseEntity.ok(ApiResponse.success(hotTagDtos));
     }
+
+    @GetMapping("")
+    public ResponseEntity<ApiResponse<?>> getPhotos(
+            @RequestParam("tagId") Long tagId
+    ) {
+        List<PhotoDto> photos = photoRepository.findByTagId(tagId)
+                .stream()
+                .map(PhotoDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(photos));
+    }
 }

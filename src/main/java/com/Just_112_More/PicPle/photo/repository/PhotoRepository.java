@@ -137,4 +137,15 @@ public class PhotoRepository {
                 .map(o -> new HotTagDto((Tag)o[0], ((Long)o[1]).intValue()))
                 .collect(Collectors.toList());
     }
+
+    public List<Photo> findByTagId(Long tagId) {
+        return em.createQuery(
+                "select p " +
+                        "from Photo p, PhotoTag pt " +
+                        "where pt.tag.id = :tagId and p.id = pt.photo.id " +
+                        "order by p.likeCount desc " +
+                        "limit 10 ", Photo.class)
+                .setParameter("tagId", tagId)
+                .getResultList();
+    }
 }
