@@ -18,6 +18,7 @@ public class LocationStat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String locationLabel;
 
     private String roadAddress;
@@ -25,6 +26,8 @@ public class LocationStat {
     private int photoCnt = 0;
 
     private LocalDateTime lastUpdateTime;
+
+    private String representativePhotoUrl;
 
     public void increasePhotoCnt(){
         this.photoCnt++;
