@@ -3,6 +3,7 @@ package com.Just_112_More.PicPle.stat.service;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.photo.domain.PhotoChangedEvent;
 import com.Just_112_More.PicPle.photo.dto.PhotosResponseDto;
+import com.Just_112_More.PicPle.photo.dto.TagDto;
 import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.service.PhotoService;
 import com.Just_112_More.PicPle.stat.domain.LocationStat;
@@ -101,6 +102,7 @@ public class LocationStatService {
                         .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
                         .address(photo.getLocationLabel())
                         .createdAt(photo.getPhotoCreate().toString())
+                        .tags(photo.getTags().stream().map(TagDto::new).toList())
                         .build()
                 )
                 .collect(Collectors.toList());
