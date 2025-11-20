@@ -5,10 +5,7 @@ import com.Just_112_More.PicPle.like.repository.LikeRepository;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.photo.domain.PhotoChangedEvent;
 import com.Just_112_More.PicPle.photo.domain.Tag;
-import com.Just_112_More.PicPle.photo.dto.UploadPhotoRequestDto;
-import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
-import com.Just_112_More.PicPle.photo.dto.PhotoDto;
-import com.Just_112_More.PicPle.photo.dto.RecommendRequest;
+import com.Just_112_More.PicPle.photo.dto.*;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import com.Just_112_More.PicPle.photo.repository.TagRepository;
 import com.Just_112_More.PicPle.user.domain.User;
@@ -239,5 +236,9 @@ public class PhotoService {
         if(tagIds==null || tagIds.isEmpty()) return;
         List<Tag> tags = tagRepository.findByIds(tagIds);
         photo.addTags(tags);
+    }
+
+    public List<HotTagDto> getHotTags() {
+        return photoRepository.countPhotoTags();
     }
 }

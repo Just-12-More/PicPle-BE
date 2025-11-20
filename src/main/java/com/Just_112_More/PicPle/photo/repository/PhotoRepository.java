@@ -1,6 +1,8 @@
 package com.Just_112_More.PicPle.photo.repository;
 
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.domain.Tag;
+import com.Just_112_More.PicPle.photo.dto.HotTagDto;
 import com.Just_112_More.PicPle.user.domain.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Repository
@@ -118,5 +121,20 @@ public class PhotoRepository {
                         "where t.id in :tagIds", Photo.class)
                 .setParameter("tagIds", tagIds)
                 .getResultList();
+    }
+
+    public List<HotTagDto> countPhotoTags() {
+        List<Object[]> result = em.createQuery(
+                "select t, count(t) " +
+                        "from Tag t, PhotoTag pt " +
+                        "where t.id = pt.tag.id " +
+                        "group by t.id " +
+                        "order by count(t) desc " +
+                        "limit 3", Object[].class)
+                .getResultList();
+
+        return result.stream()
+                .map(o -> new HotTagDto((Tag)o[0], ((Long)o[1]).intValue()))
+                .collect(Collectors.toList());
     }
 }

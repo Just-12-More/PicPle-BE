@@ -243,4 +243,10 @@ public class PhotoController {
         List<PhotoDto> photos = photoService.recommendPhotos(request);
         return ResponseEntity.ok(ApiResponse.success(photos));
     }
+
+    @GetMapping("/hot-tags")
+    public ResponseEntity<ApiResponse<?>> getHotTags() {
+        List<HotTagDto> hotTagDtos = photoService.getHotTags();
+        return ResponseEntity.ok(ApiResponse.success(hotTagDtos));
+    }
 }
