@@ -105,6 +105,7 @@ public class PhotoController {
                     .createdAt(photo.getPhotoCreate().toString())
                     .longitude(photo.getLongitude())
                     .latitude(photo.getLatitude())
+                    .tags(photo.getTags().stream().map(TagDto::new).toList())
                     .build();
 
             return ResponseEntity.ok(ApiResponse.success(dto));
@@ -140,6 +141,7 @@ public class PhotoController {
                 .createdAt(photo.getPhotoCreate().toString())
                 .latitude(photo.getLatitude())
                 .longitude(photo.getLongitude())
+                .tags(photo.getTags().stream().map(TagDto::new).toList())
                 .build())
                 .toList();
 
@@ -179,6 +181,7 @@ public class PhotoController {
                 .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
                 .address(centerPhoto.getLocationLabel())
                 .createdAt(centerPhoto.getPhotoCreate().toString())
+                .tags(centerPhoto.getTags().stream().map(TagDto::new).toList())
                 .build();
 
         // 주변 사진 DTO 생성
@@ -194,6 +197,7 @@ public class PhotoController {
                         .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
                         .address(photo.getLocationLabel())
                         .createdAt(photo.getPhotoCreate().toString())
+                        .tags(photo.getTags().stream().map(TagDto::new).toList())
                         .build())
                 .collect(Collectors.toList());
 
@@ -229,6 +233,7 @@ public class PhotoController {
                     .isLiked(false)
                     .address(photo.getLocationLabel())
                     .createdAt(photo.getPhotoCreate().toString())
+                    .tags(photo.getTags().stream().map(TagDto::new).toList())
                     .build();
 
             return ResponseEntity.ok(ApiResponse.success(dto));

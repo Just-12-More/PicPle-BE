@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -86,6 +87,12 @@ public class Photo {
     public void removeLike(Like like) {
         this.photoLikes.remove(like);
         calculateLikeCount();
+    }
+
+    public List<Tag> getTags() {
+        return this.photoTags.stream()
+                .map(PhotoTag::getTag)
+                .collect(Collectors.toList());
     }
 
     public void addTag(Tag tag) {

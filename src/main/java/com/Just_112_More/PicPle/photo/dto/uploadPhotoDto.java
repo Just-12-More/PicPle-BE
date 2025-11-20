@@ -3,6 +3,8 @@ package com.Just_112_More.PicPle.photo.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 public class uploadPhotoDto {
@@ -18,11 +20,12 @@ public class uploadPhotoDto {
     private String createdAt;
     private double latitude;
     private double longitude;
+    private List<TagDto> tags;
 
     // 명시적 생성자 (Builder 사용 시 일반적으로 불필요하지만 원하면 추가 가능)
     public uploadPhotoDto(long id, String title, String imgUrl, String description,
                           String nickname, String profileImgUrl, int likeCount,
-                          Boolean isLiked, String address, String createdAt,double latitude, double longitude) {
+                          Boolean isLiked, String address, String createdAt,double latitude, double longitude, List<TagDto> tags) {
         this.id = id;
         this.title = title;
         this.imgUrl = imgUrl;
@@ -35,6 +38,7 @@ public class uploadPhotoDto {
         this.createdAt = createdAt;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.tags = tags;
     }
 
 }
