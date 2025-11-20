@@ -271,7 +271,7 @@ public class PhotoController {
     ) {
         List<PhotoDto> photos = photoRepository.findByTagId(tagId)
                 .stream()
-                .map(PhotoDto::new)
+                .map(photo -> new PhotoDto(photo, s3Url))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(photos));
     }

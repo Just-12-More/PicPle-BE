@@ -41,6 +41,8 @@ public class PhotoService {
     @Value("${naver.x-ncp-apigw-api-key}")
     private String naverPw;
 
+    @Value("${urls.s3}")
+    private String s3Url;
     private final PhotoRepository photoRepository;
     private final LikeRepository likeRepository;
     private final TagRepository tagRepository;
@@ -238,8 +240,7 @@ public class PhotoService {
 
         // 상위 N개
         return photos.stream()
-                .limit(5)
-                .map(PhotoDto::new)
+                .map(photo -> new PhotoDto(photo, s3Url))
                 .collect(Collectors.toList());
     }
 
