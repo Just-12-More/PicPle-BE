@@ -47,6 +47,8 @@ public class PhotoService {
     private final LikeRepository likeRepository;
     private final TagRepository tagRepository;
 
+    private final VectorService vectorService;
+
     @Transactional
     public Photo uploadPhoto(UploadPhotoRequestDto requestDto, User user) {
         Photo photo = Photo.builder()
@@ -235,8 +237,8 @@ public class PhotoService {
             return List.of();
         }
 
-        List<Photo> photos = photoRepository.findByTagIdsIn(tagIds);
-        Collections.shuffle(photos);
+        List<Long> photoIds = vectorService.findPhotoIdsByTagIds(tagIds);
+        List<Photo> photos = photoRepository.findByIds(photoIds);
 
         // 상위 N개
         return photos.stream()

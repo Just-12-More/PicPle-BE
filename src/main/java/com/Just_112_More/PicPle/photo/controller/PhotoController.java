@@ -11,6 +11,7 @@ import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import com.Just_112_More.PicPle.photo.repository.TagRepository;
 import com.Just_112_More.PicPle.photo.service.PhotoAsyncProcessor;
 import com.Just_112_More.PicPle.photo.service.PhotoService;
+import com.Just_112_More.PicPle.photo.service.VectorService;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
 import com.Just_112_More.PicPle.stat.domain.LocationStat;
 import com.Just_112_More.PicPle.stat.repository.LocationStatRepository;
@@ -40,6 +41,7 @@ public class PhotoController {
 
     private final UserService userService;
     private final TagRepository tagRepository;
+    private final VectorService vectorService;
     @Value("${urls.s3}")
     private String s3Url;
 
@@ -74,6 +76,8 @@ public class PhotoController {
             // (1) 사진 저장 : 최소정보만 insert
             // Photo photo = photoService.uploadPhoto(requestDto, addressList, user);
             Photo photo = photoService.uploadPhoto(requestDto, user);
+
+            vectorService.addPhoto(photo);
 
             /*
              통계(LocationStat) 업데이트
