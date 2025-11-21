@@ -30,8 +30,8 @@ public class PhotoAsyncProcessor {
         try {
             // 1) 리버스 지오코딩 - locationlabel, roadaddress추출
             List<String> addressList = photoService.reverseGeoCoding(lat, lon);
-            String roadAddress = addressList.get(0);
-            String locationLabel = addressList.get(1);
+            String locationLabel = addressList.get(0);
+            String roadAddress = addressList.get(1);
 
             // 2) photo 업데이트
             photoService.updatePhotoAddress(photoId, roadAddress, locationLabel);
