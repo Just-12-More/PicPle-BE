@@ -39,9 +39,7 @@ public class LocationStatService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public void uploadStat(String locationLabel, String roadAddress, String photoUrl
-        , String lat, String lon
-    ) {
+    public void uploadStat(String locationLabel, String roadAddress, String photoUrl , String lat, String lon) {
         // 저장전 라벨의 대표 지오코딩 수행
         /*
         List<String> geoData = photoService.geoCoding(roadAddress);
@@ -50,7 +48,7 @@ public class LocationStatService {
         String longitude = geoData.get(1);  // 경도
          */
 
-        // upsert수행
+        // upsert수행 ->
         locationStatRepository.upsertStat(locationLabel, roadAddress, photoUrl, lon, lat);
         // stat찾기
         LocationStat locationStat = locationStatRepository.findByLocationLabel(locationLabel)
@@ -151,7 +149,7 @@ public class LocationStatService {
         for(String label : labels) {
             // Hash에서 라벨 상세정보 추출
             Map<Object, Object> entries = stringRedisTemplate.opsForHash()
-                    .entries("hotplace:data:" + label);
+                    .entries("hotplace:hash:" + label);
             if(entries == null || entries.isEmpty()) continue;
 
             // ZSET score -> photoCnt로 대입 (int로 형변환)

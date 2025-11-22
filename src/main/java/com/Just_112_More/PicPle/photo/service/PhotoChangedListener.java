@@ -27,29 +27,34 @@ public class PhotoChangedListener {
     // DB 커밋후 실행
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onPhotoChanged(PhotoChangedEvent event) {
-        PhotoUpdateEventDto eventDto = event.photoUpdateEventDto();
-        log.info("사진변경 이벤트 수신: {}", eventDto.getLocationLabel());
+        try {
+            PhotoUpdateEventDto eventDto = event.photoUpdateEventDto();
 
-        // 1) ZSET score 증가 (인기순 정렬 기준)
-        stringRedisTemplate.opsForZSet().incrementScore(
-                "hotplace:rank", eventDto.getLocationLabel(), 1);
-        log.info("ZSET 변경 : 증가 혹은 추가");
+            log.info("사진변경 이벤트 수신: {}", eventDto.getLocationLabel());
 
-        // 2) HASH 세부정보 업데이트
-        Map<String, String> hashData = new HashMap<>();
-        hashData.put("locationLabel", eventDto.getLocationLabel());
-        hashData.put("latitude", eventDto.getLatitude());
-        hashData.put("longitude", eventDto.getLongitude());
-        hashData.put("photoCnt", String.valueOf(eventDto.getPhotoCnt()));
-        hashData.put("imgUrl", s3Url+eventDto.getImgUrl());
+            // 1) ZSET score 증가 (인기순 정렬 기준)
+            stringRedisTemplate.opsForZSet().incrementScore(
+                    "hotplace:rank", eventDto.getLocationLabel(), 1);
+            log.info("ZSET 변경 : 증가 혹은 추가");
 
-        stringRedisTemplate.opsForHash().putAll(
-                "hotplace:hash:" + eventDto.getLocationLabel(),
-                hashData
-        );
-        log.info("해시정보 업데이트");
+            // 2) HASH 세부정보 업데이트
+            Map<String, String> hashData = new HashMap<>();
+            hashData.put("locationLabel", eventDto.getLocationLabel());
+            hashData.put("latitude", eventDto.getLatitude());
+            hashData.put("longitude", eventDto.getLongitude());
+            hashData.put("photoCnt", String.valueOf(eventDto.getPhotoCnt()));
+            hashData.put("imgUrl", s3Url + eventDto.getImgUrl());
 
-        // 3) TOP10 재계산, broadcast
-        hotPlaceService.setListAndBroadcast();
+            stringRedisTemplate.opsForHash().putAll(
+                    "hotplace:hash:" + eventDto.getLocationLabel(),
+                    hashData
+            );
+            log.info("해시정보 업데이트");
+
+            // 3) TOP10 재계산, broadcast
+            hotPlaceService.setListAndBroadcast();
+        } catch (Exception e) {
+            log.error("Redis 업데이트 중 오류 발생", e);
+        }
     }
 }
