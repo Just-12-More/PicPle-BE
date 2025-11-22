@@ -26,7 +26,8 @@ public class PhotoChangedListener {
 
     // DB 커밋후 실행
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void onPhotoChanged(PhotoUpdateEventDto eventDto) {
+    public void onPhotoChanged(PhotoChangedEvent event) {
+        PhotoUpdateEventDto eventDto = event.photoUpdateEventDto();
         log.info("사진변경 이벤트 수신: {}", eventDto.getLocationLabel());
 
         // 1) ZSET score 증가 (인기순 정렬 기준)
