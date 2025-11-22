@@ -5,6 +5,7 @@ import com.Just_112_More.PicPle.photo.dto.PhotoUpdateEventDto;
 import com.Just_112_More.PicPle.stat.service.HotPlaceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -20,6 +21,8 @@ public class PhotoChangedListener {
 
     private final HotPlaceService hotPlaceService;
     private final StringRedisTemplate stringRedisTemplate;
+    @Value("${urls.s3}")
+    private String s3Url;
 
     // DB 커밋후 실행
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -36,7 +39,7 @@ public class PhotoChangedListener {
         hashData.put("latitude", eventDto.getLatitude());
         hashData.put("longitude", eventDto.getLongitude());
         hashData.put("photoCnt", String.valueOf(eventDto.getPhotoCnt()));
-        hashData.put("imgUrl", eventDto.getImgUrl());
+        hashData.put("imgUrl", s3Url+eventDto.getImgUrl());
 
         stringRedisTemplate.opsForHash().putAll(
                 "hotplace:hash:" + eventDto.getLocationLabel(),
@@ -44,6 +47,6 @@ public class PhotoChangedListener {
         );
 
         // 3) TOP10 재계산, broadcast
-        hotPlaceService.checkListAndBroadcast();
+        hotPlaceService.setListAndBroadcast();
     }
 }

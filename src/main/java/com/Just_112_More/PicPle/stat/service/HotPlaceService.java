@@ -22,6 +22,7 @@ public class HotPlaceService {
     private final SimpMessagingTemplate simpleMessagingTemplate;
     private final LocationStatService locationStatService;
     private static final String TOP10_KEY = "top10::hotplaces";
+    private HotPlaceResponseList lastBroadcastList;
 
     public void saveTop10Cache(HotPlaceResponseList top10LocationStats) {
         try{
@@ -51,6 +52,26 @@ public class HotPlaceService {
             simpleMessagingTemplate.convertAndSend("/topic/hot-places", newList);
             log.info("Hotplaces TOP10 변경 감지 → Redis 갱신 및 broadcast 완료");
             log.info("변경 감지됨...old={}, new={}", oldList, newList);
+        }
+    }
+
+    public void setListAndBroadcast(){
+        HotPlaceResponseList newList = locationStatService.calculateTop10FromRedis();
+
+        // 이전 broadcast 스냅샷이 없으면,
+        // newList 자체가 '초기 브로드캐스트 대상'이 되어야 함
+        if(lastBroadcastList == null) {
+            lastBroadcastList = newList;
+            simpleMessagingTemplate.convertAndSend("/topic/hot-places", newList);
+            log.info("Hotplaces TOP10 변경 감지 → Redis 갱신 및 broadcast 완료");
+            log.info("변경 감지됨...new={}", newList);
+            return;
+        }
+
+        // 이후 변경 감지
+        if(!lastBroadcastList.equals(newList)) {
+            lastBroadcastList = newList;
+            simpleMessagingTemplate.convertAndSend("/topic/hot-places", newList);
         }
     }
 }
