@@ -32,6 +32,7 @@ public class PhotoChangedListener {
         // 1) ZSET score 증가 (인기순 정렬 기준)
         stringRedisTemplate.opsForZSet().incrementScore(
                 "hotplace:rank", eventDto.getLocationLabel(), 1);
+        log.info("ZSET 변경 : 증가 혹은 추가");
 
         // 2) HASH 세부정보 업데이트
         Map<String, String> hashData = new HashMap<>();
@@ -45,6 +46,7 @@ public class PhotoChangedListener {
                 "hotplace:hash:" + eventDto.getLocationLabel(),
                 hashData
         );
+        log.info("해시정보 업데이트");
 
         // 3) TOP10 재계산, broadcast
         hotPlaceService.setListAndBroadcast();
