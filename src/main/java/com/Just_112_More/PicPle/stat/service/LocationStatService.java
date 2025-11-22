@@ -1,7 +1,10 @@
 package com.Just_112_More.PicPle.stat.service;
 
+import com.Just_112_More.PicPle.exception.CustomException;
+import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.photo.domain.PhotoChangedEvent;
+import com.Just_112_More.PicPle.photo.dto.PhotoUpdateEventDto;
 import com.Just_112_More.PicPle.photo.dto.PhotosResponseDto;
 import com.Just_112_More.PicPle.photo.dto.TagDto;
 import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
@@ -11,7 +14,6 @@ import com.Just_112_More.PicPle.stat.dto.HotPlaceResponse;
 import com.Just_112_More.PicPle.stat.dto.HotPlaceResponseList;
 import com.Just_112_More.PicPle.stat.repository.LocationStatRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -36,11 +38,33 @@ public class LocationStatService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public void uploadStat(String locationLabel, String roadAddress, String photoUrl) {
-        locationStatRepository.upsertStat(locationLabel, roadAddress, photoUrl);
+    public void uploadStat(String locationLabel, String roadAddress, String photoUrl
+        , String lat, String lon
+    ) {
+        // 저장전 라벨의 대표 지오코딩 수행
+        /*
+        List<String> geoData = photoService.geoCoding(roadAddress);
+        log.info("Geo 결과: {}", geoData);
+        String latitude = geoData.get(0);  // 위도
+        String longitude = geoData.get(1);  // 경도
+         */
+
+        // upsert수행
+        locationStatRepository.upsertStat(locationLabel, roadAddress, photoUrl, lon, lat);
+        // stat찾기
+        LocationStat locationStat = locationStatRepository.findByLocationLabel(locationLabel)
+                .orElseThrow(() -> new CustomException(ErrorCode.STAT_NOT_FOUND));
+
+        PhotoUpdateEventDto updateEventDto = PhotoUpdateEventDto.builder()
+                .locationLabel(locationStat.getLocationLabel())
+                .photoCnt(locationStat.getPhotoCnt())
+                .longitude(locationStat.getLongitude())
+                .latitude(locationStat.getLatitude())
+                .imgUrl(locationStat.getRepresentativePhotoUrl())
+                .build();
 
         // 트랜잭션 커밋후 실행될 이벤트 등록
-        applicationEventPublisher.publishEvent(new PhotoChangedEvent(locationLabel));
+        applicationEventPublisher.publishEvent(new PhotoChangedEvent(updateEventDto));
     }
 
     public HotPlaceResponseList calculateTop10FromDB() {

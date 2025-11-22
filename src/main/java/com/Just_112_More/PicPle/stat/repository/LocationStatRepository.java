@@ -21,15 +21,25 @@ public interface LocationStatRepository extends JpaRepository<LocationStat, Long
 
     @Modifying(clearAutomatically = true)
     @Query(value = """
-        INSERT INTO location_stat (location_label, road_address, photo_cnt, last_update_time, representative_photo_url)
-        VALUES (:locationLabel, :roadAddress, 1, NOW(), :photoUrl)
+        INSERT INTO location_stat(
+            location_label, 
+            road_address,
+            photo_cnt,
+            last_update_time,
+            representative_photo_url,
+            longitude,
+            latitude                 
+        )
+        VALUES (:locationLabel, :roadAddress, 1, NOW(), :photoUrl, :longitude, :latitude)
         ON DUPLICATE KEY UPDATE
-        photo_cnt = photo_cnt + 1,
-        last_update_time = NOW()
+            photo_cnt = photo_cnt + 1,
+            last_update_time = NOW()
     """, nativeQuery = true)
     int upsertStat(
             @Param("locationLabel") String locationLabel,
             @Param("roadAddress") String roadAddress,
-            @Param("photoUrl") String photoUrl
+            @Param("photoUrl") String photoUrl,
+            @Param("longitude") String longitude,
+            @Param("latitude") String latitude
     );
 }
