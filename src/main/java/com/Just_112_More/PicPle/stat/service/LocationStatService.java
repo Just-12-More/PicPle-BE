@@ -17,18 +17,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class LocationStatService {
+
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Value("${urls.s3}")
     private String s3Url;
@@ -132,5 +134,47 @@ public class LocationStatService {
                 .collect(Collectors.toList());
 
         return new PhotosResponseDto(photoList);
+    }
+
+    public HotPlaceResponseList calculateTop10FromRedis() {
+        // ZSET에서 Top10 조회
+        Set<String> labels = stringRedisTemplate.opsForZSet()
+                .reverseRange("hotplace:rank", 0, 9);
+
+        log.info("조회 결과: {}개", labels.size());
+        if (labels == null || labels.isEmpty()) {
+            return new HotPlaceResponseList(Collections.emptyList());
+        }
+
+        List<HotPlaceResponse> results = new ArrayList<>();
+
+        int order = 1;
+        for(String label : labels) {
+            // Hash에서 라벨 상세정보 추출
+            Map<Object, Object> entries = stringRedisTemplate.opsForHash()
+                    .entries("hotplace:data:" + label);
+            if(entries == null || entries.isEmpty()) continue;
+
+            // ZSET score -> photoCnt로 대입 (int로 형변환)
+            Double score = stringRedisTemplate.opsForZSet().score("hotplace:rank", label);
+            int photoCnt = score != null ? score.intValue() : 0;
+
+            // DTO재조립
+            HotPlaceResponse hotPlaceResponse = HotPlaceResponse.builder()
+                    .order(order++)
+                    .locationLabel(label)
+                    .latitude((String) entries.get("latitude"))
+                    .longitude((String) entries.get("longitude"))
+                    .imgUrl((String) entries.get("imgUrl"))
+                    .photoCnt(photoCnt)
+                    .build();
+
+            results.add(hotPlaceResponse);
+        }
+        log.info("총 결과 개수 = {}", results.size());
+
+        return HotPlaceResponseList.builder()
+                .hotplaces(results)
+                .build();
     }
 }
