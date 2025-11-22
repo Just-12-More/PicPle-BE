@@ -97,7 +97,7 @@ public class LocationStatService {
                         .imgUrl(s3Url + photo.getPhotoUrl())
                         .description(photo.getPhotoDesc())
                         .nickname(photo.getUser().getUserName())
-                        .profileImgUrl(photo.getUser().getProfilePath())
+                        .profileImgUrl(s3Url + photo.getUser().getProfilePath())
                         .likeCount(photo.getLikeCount())
                         .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
                         .address(photo.getLocationLabel())
