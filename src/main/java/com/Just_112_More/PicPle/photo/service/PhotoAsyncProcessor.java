@@ -34,7 +34,7 @@ public class PhotoAsyncProcessor {
             String roadAddress = addressList.get(1);
 
             // 2) photo 업데이트
-            photoService.updatePhotoAddress(photoId, roadAddress, locationLabel);
+            photoService.updatePhotoAddress(photoId, locationLabel, roadAddress);
 
             // 3) LocationStat 업데이트
             locationStatService.uploadStat(locationLabel, roadAddress, photoUrl);
