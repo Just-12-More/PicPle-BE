@@ -11,7 +11,6 @@ import com.Just_112_More.PicPle.stat.dto.HotPlaceResponse;
 import com.Just_112_More.PicPle.stat.dto.HotPlaceResponseList;
 import com.Just_112_More.PicPle.stat.repository.LocationStatRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -36,8 +35,8 @@ public class LocationStatService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public void uploadStat(String locationLabel, String roadAddress, String photoUrl) {
-        locationStatRepository.upsertStat(locationLabel, roadAddress, photoUrl);
+    public void uploadStat(String locationLabel, String roadAddress, String photoUrl, String lat, String lon) {
+        locationStatRepository.upsertStat(locationLabel, roadAddress, photoUrl, lat, lon);
 
         // 트랜잭션 커밋후 실행될 이벤트 등록
         applicationEventPublisher.publishEvent(new PhotoChangedEvent(locationLabel));
@@ -57,6 +56,7 @@ public class LocationStatService {
             log.info("처리 중: {} / {}", locationStat.getLocationLabel(), locationStat.getRoadAddress());
 
             // 위치 라벨로 geocoding을 통해 위도, 경도 조회
+            /*
             if ("도로명 정보 없음".equals(locationStat.getRoadAddress())) {
                 log.info("건너뜀: {}", locationStat.getLocationLabel());
                 continue;
@@ -65,13 +65,14 @@ public class LocationStatService {
             log.info("Geo 결과: {}", geoData);
             String latitude = geoData.get(0);  // 위도
             String longitude = geoData.get(1);  // 경도
+             */
 
             HotPlaceResponse hotPlaceResponse = HotPlaceResponse.builder()
                     .order(i + 1)
                     .locationLabel(locationStat.getLocationLabel())
                     .photoCnt(locationStat.getPhotoCnt())
-                    .latitude(latitude)
-                    .longitude(longitude)
+                    .latitude(locationStat.getLat())
+                    .longitude(locationStat.getLon())
                     .imgUrl(s3Url + locationStat.getRepresentativePhotoUrl())
                     .build();
             results.add(hotPlaceResponse);

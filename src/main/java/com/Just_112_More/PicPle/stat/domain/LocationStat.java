@@ -29,6 +29,9 @@ public class LocationStat {
 
     private String representativePhotoUrl;
 
+    private String lat;
+    private String lon;
+
     public void increasePhotoCnt(){
         this.photoCnt++;
         this.lastUpdateTime = LocalDateTime.now();

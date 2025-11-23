@@ -37,7 +37,7 @@ public class PhotoAsyncProcessor {
             photoService.updatePhotoAddress(photoId, locationLabel, roadAddress);
 
             // 3) LocationStat 업데이트
-            locationStatService.uploadStat(locationLabel, roadAddress, photoUrl);
+            locationStatService.uploadStat(locationLabel, roadAddress, photoUrl, String.valueOf(lat), String.valueOf(lon));
         } catch (Exception e) {
             log.error("Async photo processing failed. photoId=" + photoId, e);
         }
