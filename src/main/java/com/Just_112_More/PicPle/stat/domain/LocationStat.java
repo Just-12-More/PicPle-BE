@@ -29,8 +29,8 @@ public class LocationStat {
 
     private String representativePhotoUrl;
 
-    private String lat;
-    private String lon;
+    private String latitude;
+    private String longitude;
 
     public void increasePhotoCnt(){
         this.photoCnt++;

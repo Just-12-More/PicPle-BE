@@ -1,18 +1,11 @@
 package com.Just_112_More.PicPle.photo.service;
 
-import com.Just_112_More.PicPle.common.ApiResponse;
-import com.Just_112_More.PicPle.exception.CustomException;
-import com.Just_112_More.PicPle.exception.ErrorCode;
-import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import com.Just_112_More.PicPle.stat.service.LocationStatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -30,16 +23,17 @@ public class PhotoAsyncProcessor {
         try {
             // 1) 리버스 지오코딩 - locationlabel, roadaddress추출
             List<String> addressList = photoService.reverseGeoCoding(lat, lon);
-            String locationLabel = addressList.get(0);
-            String roadAddress = addressList.get(1);
+            String roadAddress = addressList.get(0); // 도로명 주소
+            String locationLabel = addressList.get(1); // 법정동 기본 주소
 
             // 2) photo 업데이트
             photoService.updatePhotoAddress(photoId, locationLabel, roadAddress);
 
             // 3) LocationStat 업데이트
-            locationStatService.uploadStat(locationLabel, roadAddress, photoUrl, String.valueOf(lat), String.valueOf(lon));
+            locationStatService.uploadStat(locationLabel, roadAddress, photoUrl,
+                    String.valueOf(lat), String.valueOf(lon));
         } catch (Exception e) {
-            log.error("Async photo processing failed. photoId=" + photoId, e);
+            log.error("사진 비동기처리 실패:: photoId=" + photoId, e);
         }
 
     }

@@ -23,6 +23,7 @@ public enum ErrorCode {
 
     // photo excpetion
     PHOTO_NOT_FOUND(HttpStatus.NOT_FOUND, "사진을 찾을 수 없습니다."),
+    STAT_NOT_FOUND(HttpStatus.NOT_FOUND, "사진통계라벨을 찾을 수 없습니다."),
 
     // jwt 내부 에러
     INVALID_TOKEN_SIGNATURE(HttpStatus.FORBIDDEN, "JWT 서명 검증 실패"),

@@ -1,5 +1,6 @@
 package com.Just_112_More.PicPle.test;
 
+
 import com.Just_112_More.PicPle.common.ApiResponse;
 import com.Just_112_More.PicPle.stat.dto.HotPlaceResponseList;
 import com.Just_112_More.PicPle.stat.service.LocationStatService;
@@ -14,9 +15,9 @@ public class LoadTest {
 
     private final LocationStatService locationStatService;
 
-    @GetMapping("/test/query")
-    public ResponseEntity<ApiResponse<?>> getPhotolankbyquery(){
-        HotPlaceResponseList list = locationStatService.calculateTop10FromDB();
+    @GetMapping("/test/redis")
+    public ResponseEntity<ApiResponse<?>> getPhotolankbyredis(){
+        HotPlaceResponseList list = locationStatService.calculateTop10FromRedis();
         return ResponseEntity.ok(ApiResponse.success(list));
     }
 }
