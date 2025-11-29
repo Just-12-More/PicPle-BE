@@ -11,6 +11,7 @@ build/
 **/build/
 /src/main/resources/application.yml
 /src/main/resources/schema-dev.sql
+/src/main/java/com/Just_112_More/PicPle/PhotoRestoreRunner.java
 
 ### Eclipse ###
 .metadata

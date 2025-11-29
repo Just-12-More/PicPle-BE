@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Getter
+@Setter
 @ToString(exclude = {"user", "photoLikes"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Photo {

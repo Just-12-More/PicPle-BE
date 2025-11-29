@@ -1,6 +1,5 @@
 package com.Just_112_More.PicPle.stat.dto;
 
-import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

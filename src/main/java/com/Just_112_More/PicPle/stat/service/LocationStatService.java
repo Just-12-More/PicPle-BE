@@ -80,6 +80,7 @@ public class LocationStatService {
             log.info("처리 중: {} / {}", locationStat.getLocationLabel(), locationStat.getRoadAddress());
 
             // 위치 라벨로 geocoding을 통해 위도, 경도 조회
+            /*
             if ("도로명 정보 없음".equals(locationStat.getRoadAddress())) {
                 log.info("건너뜀: {}", locationStat.getLocationLabel());
                 continue;
@@ -88,13 +89,14 @@ public class LocationStatService {
             log.info("Geo 결과: {}", geoData);
             String latitude = geoData.get(0);  // 위도
             String longitude = geoData.get(1);  // 경도
+             */
 
             HotPlaceResponse hotPlaceResponse = HotPlaceResponse.builder()
                     .order(i + 1)
                     .locationLabel(locationStat.getLocationLabel())
                     .photoCnt(locationStat.getPhotoCnt())
-                    .latitude(latitude)
-                    .longitude(longitude)
+                    .latitude(locationStat.getLat())
+                    .longitude(locationStat.getLon())
                     .imgUrl(s3Url + locationStat.getRepresentativePhotoUrl())
                     .build();
             results.add(hotPlaceResponse);
@@ -120,7 +122,7 @@ public class LocationStatService {
                         .imgUrl(s3Url + photo.getPhotoUrl())
                         .description(photo.getPhotoDesc())
                         .nickname(photo.getUser().getUserName())
-                        .profileImgUrl(photo.getUser().getProfilePath())
+                        .profileImgUrl(s3Url + photo.getUser().getProfilePath())
                         .likeCount(photo.getLikeCount())
                         .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
                         .address(photo.getLocationLabel())

@@ -138,13 +138,14 @@ public class PhotoService {
                 }
             }
 
-            reverseGeoCoding.add(roadAddress != null ? roadAddress : "도로명 정보 없음");
             reverseGeoCoding.add(defaultAddress != null ? defaultAddress : "주소 정보 없음");
+            reverseGeoCoding.add(roadAddress != null ? roadAddress : "도로명 정보 없음");
+
             return reverseGeoCoding;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return List.of("도로명 정보 없음", "주소 정보 없음");
+            return List.of("주소 정보 없음","도로명 정보 없음");
         }
     }
 
