@@ -95,8 +95,8 @@ public class LocationStatService {
                     .order(i + 1)
                     .locationLabel(locationStat.getLocationLabel())
                     .photoCnt(locationStat.getPhotoCnt())
-                    .latitude(locationStat.getLat())
-                    .longitude(locationStat.getLon())
+                    .latitude(locationStat.getLatitude())
+                    .longitude(locationStat.getLongitude())
                     .imgUrl(s3Url + locationStat.getRepresentativePhotoUrl())
                     .build();
             results.add(hotPlaceResponse);
