@@ -176,4 +176,8 @@ public class LocationStatService {
                 .hotplaces(results)
                 .build();
     }
+
+    public List<LocationStat> findAll() {
+        return locationStatRepository.findAll();
+    }
 }

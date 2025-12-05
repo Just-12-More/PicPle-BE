@@ -20,9 +20,17 @@ public class LocationStatController {
     private final LocationStatService locationStatService;
     private final HotPlaceService hotPlaceService;
 
+    /*
     @GetMapping("/top10")
     public ResponseEntity<ApiResponse<?>> getTop10LocationStats() {
         HotPlaceResponseList top10LocationStats = hotPlaceService.getTop10Cache();
+        return ResponseEntity.ok(ApiResponse.success(top10LocationStats));
+    }
+     */
+
+    @GetMapping("/top10")
+    public ResponseEntity<ApiResponse<?>> getTop10LocationStats() {
+        HotPlaceResponseList top10LocationStats = locationStatService.calculateTop10FromRedis();
         return ResponseEntity.ok(ApiResponse.success(top10LocationStats));
     }
 

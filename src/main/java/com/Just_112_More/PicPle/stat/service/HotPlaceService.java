@@ -25,10 +25,10 @@ public class HotPlaceService {
     private HotPlaceResponseList lastBroadcastList;
 
     public void saveTop10Cache(HotPlaceResponseList top10LocationStats) {
-        try{
+        try {
             String json = objectMapper.writeValueAsString(top10LocationStats);
             redisTemplate.opsForValue().set(TOP10_KEY, json);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new CustomException(ErrorCode.REDIS_SAVE_FAIL);
         }
     }
