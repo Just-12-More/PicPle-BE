@@ -11,6 +11,9 @@ import java.util.List;
 
 @Entity
 @Getter
+@Table(name = "photo", indexes = {
+        @Index(name = "idx_location", columnList = "latitude, longitude")
+})
 @ToString(exclude = {"user", "photoLikes"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Photo {

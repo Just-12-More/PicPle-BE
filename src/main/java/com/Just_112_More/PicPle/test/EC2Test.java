@@ -1,4 +1,4 @@
-package com.Just_112_More.PicPle.test1;
+package com.Just_112_More.PicPle.test;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
