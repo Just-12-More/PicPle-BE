@@ -7,13 +7,17 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
 @Table(name = "photo", indexes = {
         @Index(name = "idx_location", columnList = "latitude, longitude")
 })
+@Setter
 @ToString(exclude = {"user", "photoLikes"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Photo {
@@ -32,6 +36,7 @@ public class Photo {
     private Double latitude;
     private Double longitude;
     private String locationLabel;
+    private String roadAddress;
 
     private int likeCount = 0;
     private LocalDateTime photoCreate;
@@ -43,19 +48,28 @@ public class Photo {
     @OneToMany(mappedBy = "photo", cascade = CascadeType.ALL)
     private List<Like> photoLikes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "photo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PhotoTag> photoTags = new HashSet<>();
+
     @Builder
     public Photo(String photoTitle, String photoDesc, String photoUrl,
-                 Double latitude, Double longitude, String locationLabel) {
+                 Double latitude, Double longitude, String locationLabel, String roadAddress) {
         this.photoTitle = photoTitle;
         this.photoDesc = photoDesc;
         this.photoUrl = photoUrl;
         this.latitude = latitude;
         this.longitude = longitude;
         this.locationLabel = locationLabel;
+        this.roadAddress = roadAddress;
     }
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public void updateAddress(String locationLabel, String roadAddress ) {
+        this.locationLabel = locationLabel;
+        this.roadAddress = roadAddress;
     }
 
     @PrePersist
@@ -77,6 +91,33 @@ public class Photo {
     public void removeLike(Like like) {
         this.photoLikes.remove(like);
         calculateLikeCount();
+    }
+
+    public List<Tag> getTags() {
+        return this.photoTags.stream()
+                .map(PhotoTag::getTag)
+                .collect(Collectors.toList());
+    }
+
+    public void addTag(Tag tag) {
+        if (tag == null || tag.getId() == null) {
+            throw new IllegalArgumentException("Tag must be persisted.");
+        }
+
+        PhotoTag photoTag = new PhotoTag(this, tag);
+        this.photoTags.add(photoTag);
+    }
+
+    public void addTags(List<Tag> tags) {
+        if (tags == null || tags.isEmpty()) return;
+        for (Tag tag : tags) {
+            addTag(tag);
+        }
+    }
+
+    public void removeTag(Tag tag) {
+        if(tag == null || tag.getId() == null) return;
+        this.photoTags.removeIf(photoTag -> photoTag.getTag().getId().equals(tag.getId()));
     }
 
     public String getMapUrl() {

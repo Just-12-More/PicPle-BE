@@ -3,10 +3,8 @@ package com.Just_112_More.PicPle.user.controller;
 import com.Just_112_More.PicPle.common.ApiResponse;
 import com.Just_112_More.PicPle.exception.CustomException;
 import com.Just_112_More.PicPle.exception.ErrorCode;
-import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.photo.dto.MyPagePhotoDto;
 import com.Just_112_More.PicPle.photo.dto.MyPagePhotoDtoList;
-import com.Just_112_More.PicPle.photo.dto.uploadPhotoDto;
 import com.Just_112_More.PicPle.photo.service.S3Service;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
 import com.Just_112_More.PicPle.user.dto.ProfileDto;
@@ -18,8 +16,6 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 @RestController

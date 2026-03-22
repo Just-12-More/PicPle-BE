@@ -4,21 +4,34 @@ import com.Just_112_More.PicPle.common.ApiResponse;
 import com.Just_112_More.PicPle.exception.CustomException;
 import com.Just_112_More.PicPle.exception.ErrorCode;
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.domain.Tag;
+import com.Just_112_More.PicPle.photo.domain.TagType;
 import com.Just_112_More.PicPle.photo.dto.*;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
+import com.Just_112_More.PicPle.photo.repository.TagRepository;
+import com.Just_112_More.PicPle.photo.service.PhotoAsyncProcessor;
 import com.Just_112_More.PicPle.photo.service.PhotoService;
+import com.Just_112_More.PicPle.photo.service.VectorService;
 import com.Just_112_More.PicPle.security.jwt.JwtUtil;
+import com.Just_112_More.PicPle.stat.domain.LocationStat;
+import com.Just_112_More.PicPle.stat.repository.LocationStatRepository;
+import com.Just_112_More.PicPle.stat.service.HotPlaceService;
+import com.Just_112_More.PicPle.stat.service.LocationStatService;
 import com.Just_112_More.PicPle.user.domain.User;
 import com.Just_112_More.PicPle.user.repository.UserRepository;
 
+import com.Just_112_More.PicPle.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,20 +39,27 @@ import java.util.stream.Collectors;
 @RequestMapping("/v1/photos")
 public class PhotoController {
 
+    private final UserService userService;
+    private final TagRepository tagRepository;
+    private final VectorService vectorService;
     @Value("${urls.s3}")
     private String s3Url;
 
     private final PhotoRepository photoRepository;
     private final PhotoService photoService;
+    private final LocationStatService locationStatService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final PhotoAsyncProcessor photoAsyncProcessor;
 
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<?>> upload(
             HttpServletRequest request,
-            @RequestBody uploadPhotoRequestDto requestDto
+            @RequestBody UploadPhotoRequestDto requestDto
     ) {
         try {
+
+            // (0) jwt 검증
             String token = jwtUtil.resolveToken(request);
             if (token == null) throw new CustomException(ErrorCode.ACCESS_TOKEN_MISSING);
             jwtUtil.validateAccessToken(token);
@@ -48,19 +68,34 @@ public class PhotoController {
             User user = userRepository.findOne(userId)
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-            String address = photoService.geoCoding(requestDto.getLatitude(), requestDto.getLongitude());
-            //String address ="";
-            Photo photo = Photo.builder()
-                    .photoTitle(requestDto.getTitle())
-                    .photoDesc(requestDto.getDescription())
-                    .photoUrl(requestDto.getPhotoUrl())
-                    .latitude(requestDto.getLatitude())
-                    .longitude(requestDto.getLongitude())
-                    .locationLabel(address)
-                    .build();
-            photo.setUser(user);
-            photoRepository.save(photo);
+            /*
+             좌표로 주소 변환
+            List<String> ad adressList = photoService.reverseGeoCoding(requestDto.getLatitude(), requestDto.getLongitude());
+            */
 
+            // (1) 사진 저장 : 최소정보만 insert
+            // Photo photo = photoService.uploadPhoto(requestDto, addressList, user);
+            Photo photo = photoService.uploadPhoto(requestDto, user);
+
+            vectorService.addPhoto(photo);
+
+            /*
+             통계(LocationStat) 업데이트
+            // 통계(LocationStat) 업데이트
+            // localStat에서 검색후 있다면 찾고 증가, 없다면 새로 생성
+            LocationStat locationStat
+                 = locationStatService.uploadStat(photo.getLocationLabel(), photo.getRoadAddress());
+            */
+
+            // (2) 비동기 worker에 처리 요청
+            photoAsyncProcessor.processPhotoAsync(
+                    photo.getId(),
+                    requestDto.getLatitude(),
+                    requestDto.getLongitude(),
+                    requestDto.getPhotoUrl()
+            );
+
+            // (3) 업로드 완료 응답 즉시 반환
             uploadPhotoDto dto = uploadPhotoDto.builder()
                     .id(photo.getId())
                     .title(photo.getPhotoTitle())
@@ -70,10 +105,11 @@ public class PhotoController {
                     .profileImgUrl(user.getProfilePath())
                     .likeCount(photo.getLikeCount())
                     .isLiked(false)
-                    .address(photo.getLocationLabel())
+                    //.address(photo.getLocationLabel())
                     .createdAt(photo.getPhotoCreate().toString())
                     .longitude(photo.getLongitude())
                     .latitude(photo.getLatitude())
+                    .tags(photo.getTags().stream().map(TagDto::new).toList())
                     .build();
 
             return ResponseEntity.ok(ApiResponse.success(dto));
@@ -102,17 +138,18 @@ public class PhotoController {
                         .imgUrl(s3Url + photo.getPhotoUrl())
                         .description(photo.getPhotoDesc())
                 .nickname(photo.getUser().getUserName())
-                .profileImgUrl(photo.getUser().getProfilePath())
+                .profileImgUrl(s3Url + photo.getUser().getProfilePath())
                 .likeCount(photo.getLikeCount())
                 .isLiked(false)
                 .address(photo.getLocationLabel())
                 .createdAt(photo.getPhotoCreate().toString())
                 .latitude(photo.getLatitude())
                 .longitude(photo.getLongitude())
+                .tags(photo.getTags().stream().map(TagDto::new).toList())
                 .build())
                 .toList();
 
-        photosResponseDto responseDto = photosResponseDto.builder()
+        PhotosResponseDto responseDto = PhotosResponseDto.builder()
                 .photos(dtoList)
                 .build();
 
@@ -143,11 +180,12 @@ public class PhotoController {
                 .imgUrl(s3Url + centerPhoto.getPhotoUrl())
                 .description(centerPhoto.getPhotoDesc())
                 .nickname(centerPhoto.getUser().getUserName())
-                .profileImgUrl(centerPhoto.getUser().getProfilePath())
+                .profileImgUrl(s3Url + centerPhoto.getUser().getProfilePath())
                 .likeCount(centerPhoto.getLikeCount())
                 .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
                 .address(centerPhoto.getLocationLabel())
                 .createdAt(centerPhoto.getPhotoCreate().toString())
+                .tags(centerPhoto.getTags().stream().map(TagDto::new).toList())
                 .build();
 
         // 주변 사진 DTO 생성
@@ -158,11 +196,12 @@ public class PhotoController {
                         .imgUrl(s3Url + photo.getPhotoUrl())
                         .description(photo.getPhotoDesc())
                         .nickname(photo.getUser().getUserName())
-                        .profileImgUrl(photo.getUser().getProfilePath())
+                        .profileImgUrl(s3Url + photo.getUser().getProfilePath())
                         .likeCount(photo.getLikeCount())
                         .isLiked(false) // 실제로 로그인한 사용자가 있으면 여기서 체크
                         .address(photo.getLocationLabel())
                         .createdAt(photo.getPhotoCreate().toString())
+                        .tags(photo.getTags().stream().map(TagDto::new).toList())
                         .build())
                 .collect(Collectors.toList());
 
@@ -193,11 +232,12 @@ public class PhotoController {
                     .imgUrl(s3Url + photo.getPhotoUrl())
                     .description(photo.getPhotoDesc())
                     .nickname(user.getUserName())
-                    .profileImgUrl(user.getProfilePath())
+                    .profileImgUrl(s3Url + user.getProfilePath())
                     .likeCount(photo.getLikeCount())
                     .isLiked(false)
                     .address(photo.getLocationLabel())
                     .createdAt(photo.getPhotoCreate().toString())
+                    .tags(photo.getTags().stream().map(TagDto::new).toList())
                     .build();
 
             return ResponseEntity.ok(ApiResponse.success(dto));
@@ -206,5 +246,42 @@ public class PhotoController {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.fail(null, "INTERNAL_ERROR", "요청하신 사진이 없습니다."));
         }
+    }
+
+    @GetMapping("/tags")
+    public ResponseEntity<ApiResponse<?>> getPhotoTags(
+        HttpServletRequest request
+    ) {
+        List<Tag> tags = tagRepository.findAll();
+        Map<Boolean, List<TagDto>> partitionedTags = tags.stream()
+                .map(TagDto::new)
+                .collect(Collectors.partitioningBy(tagDto -> tagDto.getTagType().equals(TagType.NOUN.name())));
+        TagResponse tagResponse = new TagResponse(partitionedTags.get(false), partitionedTags.get(true));
+        return ResponseEntity.ok(ApiResponse.success(tagResponse));
+    }
+
+    @PostMapping("/recommend")
+    public ResponseEntity<ApiResponse<?>> getRecommendedPhotos(
+            @RequestBody RecommendRequest request
+    ) {
+        List<PhotoDto> photos = photoService.recommendPhotos(request);
+        return ResponseEntity.ok(ApiResponse.success(photos));
+    }
+
+    @GetMapping("/hot-tags")
+    public ResponseEntity<ApiResponse<?>> getHotTags() {
+        List<HotTagDto> hotTagDtos = photoService.getHotTags();
+        return ResponseEntity.ok(ApiResponse.success(hotTagDtos));
+    }
+
+    @GetMapping("")
+    public ResponseEntity<ApiResponse<?>> getPhotos(
+            @RequestParam("tagId") Long tagId
+    ) {
+        List<PhotoDto> photos = photoRepository.findByTagId(tagId)
+                .stream()
+                .map(photo -> new PhotoDto(photo, s3Url))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(photos));
     }
 }

@@ -21,6 +21,10 @@ public enum ErrorCode {
     USER_IMAGE_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "유저 프로필 업로드에 실패했습니다." ),
     USER_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "유저정보를 찾을 수 없습니다." ),
 
+    // photo excpetion
+    PHOTO_NOT_FOUND(HttpStatus.NOT_FOUND, "사진을 찾을 수 없습니다."),
+    STAT_NOT_FOUND(HttpStatus.NOT_FOUND, "사진통계라벨을 찾을 수 없습니다."),
+
     // jwt 내부 에러
     INVALID_TOKEN_SIGNATURE(HttpStatus.FORBIDDEN, "JWT 서명 검증 실패"),
     MALFORMED_TOKEN_ERROR(HttpStatus.UNAUTHORIZED, "잘못된 JWT 형식입니다."),
@@ -39,7 +43,12 @@ public enum ErrorCode {
     INVALID_OAUTH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 SDK code입니다."),
     OAUTH_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "OAuth 인증 서버에 연결할 수 없습니다."),
     OAUTH_RESPONSE_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "OAuth 사용자 정보 응답이 잘못되었습니다."),
-    REDIS_SAVE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "리프레시 토큰 저장에 실패했습니다.");
+
+    // redis 관련 에러
+    REDIS_SAVE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "redis 저장에 실패했습니다."),
+    REDIS_READ_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "redis 로드에 실패했습니다.")
+    ;
+
 
     private final HttpStatus status;
     private final String message;

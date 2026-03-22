@@ -1,0 +1,41 @@
+package com.Just_112_More.PicPle.photo.service;
+
+import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
+import com.Just_112_More.PicPle.stat.service.LocationStatService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class PhotoAsyncProcessor {
+
+    private final PhotoService photoService;
+    private final PhotoRepository photoRepository;
+    private final LocationStatService locationStatService;
+
+    @Async("photoWorkerExecutor")
+    public void processPhotoAsync(Long photoId, double lat, double lon, String photoUrl) {
+        try {
+            // 1) 리버스 지오코딩 - locationlabel, roadaddress추출
+            List<String> addressList = photoService.reverseGeoCoding(lat, lon);
+            String roadAddress = addressList.get(0); // 도로명 주소
+            String locationLabel = addressList.get(1); // 법정동 기본 주소
+
+            // 2) photo 업데이트
+            photoService.updatePhotoAddress(photoId, locationLabel, roadAddress);
+
+            // 3) LocationStat 업데이트
+            locationStatService.uploadStat(locationLabel, roadAddress, photoUrl,
+                    String.valueOf(lat), String.valueOf(lon));
+        } catch (Exception e) {
+            log.error("사진 비동기처리 실패:: photoId=" + photoId, e);
+        }
+
+    }
+
+}

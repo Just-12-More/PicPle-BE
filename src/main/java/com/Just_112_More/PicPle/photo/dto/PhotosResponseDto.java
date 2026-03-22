@@ -5,11 +5,11 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class photosResponseDto {
+public class PhotosResponseDto {
     private final List<uploadPhotoDto> photos;
 
     @Builder
-    public photosResponseDto(List<uploadPhotoDto> photos) {
+    public PhotosResponseDto(List<uploadPhotoDto> photos) {
         this.photos = photos;
     }
 }

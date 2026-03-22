@@ -1,6 +1,8 @@
 package com.Just_112_More.PicPle.photo.repository;
 
 import com.Just_112_More.PicPle.photo.domain.Photo;
+import com.Just_112_More.PicPle.photo.domain.Tag;
+import com.Just_112_More.PicPle.photo.dto.HotTagDto;
 import com.Just_112_More.PicPle.user.domain.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Repository
@@ -18,11 +21,12 @@ public class PhotoRepository {
     private final EntityManager em;
 
     @Transactional
-    public void save(Photo photo) {
+    public Photo save(Photo photo) {
         if(photo.getId()==null){
             em.persist(photo);
+            return photo;
         } else {
-            em.merge(photo);
+            return em.merge(photo);
         }
     }
 
@@ -98,4 +102,60 @@ public class PhotoRepository {
         }
     }
 
+    public List<Photo> findByLocationLabel(String locationLabel) {
+        String sql = "SELECT p FROM Photo p WHERE p.locationLabel = :locationLabel";
+        return em.createQuery(sql, Photo.class)
+                .setParameter("locationLabel", locationLabel).getResultList();
+    }
+
+    public List<Photo> findByTagIdsIn(List<Long> tagIds) {
+        if(tagIds==null || tagIds.isEmpty()){
+            return List.of();
+        }
+
+        return em.createQuery(
+                "select distinct p " +
+                        "from Photo p " +
+                        "join p.photoTags pt " +
+                        "join pt.tag t " +
+                        "where t.id in :tagIds", Photo.class)
+                .setParameter("tagIds", tagIds)
+                .getResultList();
+    }
+
+    public List<HotTagDto> countPhotoTags() {
+        List<Object[]> result = em.createQuery(
+                "select t, count(t) " +
+                        "from Tag t, PhotoTag pt " +
+                        "where t.id = pt.tag.id " +
+                        "group by t.id " +
+                        "order by count(t) desc " +
+                        "limit 3", Object[].class)
+                .getResultList();
+
+        return result.stream()
+                .map(o -> new HotTagDto((Tag)o[0], ((Long)o[1]).intValue()))
+                .collect(Collectors.toList());
+    }
+
+    public List<Photo> findByTagId(Long tagId) {
+        return em.createQuery(
+                "select p " +
+                        "from Photo p, PhotoTag pt " +
+                        "where pt.tag.id = :tagId and p.id = pt.photo.id " +
+                        "order by p.likeCount desc " +
+                        "limit 10 ", Photo.class)
+                .setParameter("tagId", tagId)
+                .getResultList();
+    }
+
+    public List<Photo> findByIds(List<Long> photoIds) {
+        return em.createQuery(
+                "select p " +
+                        "from Photo p " +
+                        "where p.id in :photoIds " +
+                        "order by p.likeCount desc", Photo.class)
+                .setParameter("photoIds", photoIds)
+                .getResultList();
+    }
 }
