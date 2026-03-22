@@ -22,11 +22,10 @@ public class TagRepository {
 
     @Transactional
     public List<Tag> findByIds(List<Long> ids) {
-        List<Tag> tags = new ArrayList<>();
-        for (Long id : ids) {
-            tags.add(findById(id));
-        }
-        return tags;
+        if (ids == null || ids.isEmpty()) return List.of();
+        return em.createQuery("FROM Tag t WHERE t.id IN :ids", Tag.class)
+                .setParameter("ids", ids)
+                .getResultList();
     }
 
     public List<Tag> findAll() {
