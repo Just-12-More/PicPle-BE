@@ -1,23 +1,20 @@
 package com.Just_112_More.PicPle;
 
+import com.Just_112_More.PicPle.contatiner.MySqlRepositoryTest;
 import com.Just_112_More.PicPle.photo.domain.Photo;
 import com.Just_112_More.PicPle.photo.repository.PhotoRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-@Transactional
 @Import(PhotoRepository.class)
-class PhotoRepositoryTest {
+class PhotoRepositoryTest extends MySqlRepositoryTest {
 
     @Autowired
     private TestEntityManager em;
@@ -79,7 +76,7 @@ class PhotoRepositoryTest {
     @Test
     @DisplayName("대량 데이터 성능 비교를 위한 기초 테스트")
     void performanceCheck() {
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 2000; i++) {
             em.persist(Photo.builder()
                     .latitude(37.49 + (Math.random() * 0.05))
                     .longitude(127.02 + (Math.random() * 0.05))
@@ -93,7 +90,7 @@ class PhotoRepositoryTest {
         List<Photo> results = photoRepository.findPhotosByLocation(37.4979, 127.0276, 1.0);
         long endTime = System.currentTimeMillis();
 
-        System.out.println("\n⏱ [성능 체크] 10000건 중 " + results.size() + "건 조회 소요 시간: " + (endTime - startTime) + "ms\n");
+        System.out.println("\n⏱ [성능 체크] 2000건 중 " + results.size() + "건 조회 소요 시간: " + (endTime - startTime) + "ms\n");
     }
 
     // 결과 해석을 돕기 위한 보조 메서드 (Java 공식 계산)
